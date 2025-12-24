@@ -63,7 +63,10 @@ export default function Home() {
         </div>
 
         {/* Pro Banner */}
-        <div className="bg-gradient-to-r from-purple-500 to-blue-500 rounded-2xl p-6 mb-8 text-white flex items-center justify-between">
+        <div 
+          onClick={() => navigate('/pricing')}
+          className="bg-gradient-to-r from-purple-500 to-blue-500 rounded-2xl p-6 mb-8 text-white flex items-center justify-between cursor-pointer hover:shadow-xl transition-all"
+        >
           <div className="flex items-center gap-3">
             <Crown className="w-8 h-8" />
             <div>
@@ -97,7 +100,7 @@ export default function Home() {
         </div>
 
         {/* Recent Activity */}
-        <div className="bg-white rounded-xl p-8 text-center">
+        <div className="bg-white rounded-xl p-8 text-center mb-20">
           <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <FileText className="w-8 h-8 text-gray-400" />
           </div>
