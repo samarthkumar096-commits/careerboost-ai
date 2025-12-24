@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { auth, firebaseAuth } from '../lib/firebase'
+import { onAuthStateChanged } from 'firebase/auth'
 
 const AuthContext = createContext({})
 
@@ -16,49 +17,42 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Check active sessions
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
+    // Listen for auth state changes
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user)
       setLoading(false)
     })
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
-
-    return () => subscription.unsubscribe()
+    return unsubscribe
   }, [])
 
   const value = {
     user,
     loading,
-    signUp: (email, password, userData) => supabase.auth.signUp({
-      email,
-      password,
-      options: { data: userData }
-    }),
-    signIn: (email, password) => supabase.auth.signInWithPassword({
-      email,
-      password
-    }),
-    signInWithGoogle: () => supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`
-      }
-    }),
-    signInWithGitHub: () => supabase.auth.signInWithOAuth({
-      provider: 'github',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`
-      }
-    }),
-    signOut: () => supabase.auth.signOut(),
-    resetPassword: (email) => supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`
-    })
+    signUp: async (email, password, displayName) => {
+      const { user, error } = await firebaseAuth.signUp(email, password, displayName)
+      return { data: { user }, error }
+    },
+    signIn: async (email, password) => {
+      const { user, error } = await firebaseAuth.signIn(email, password)
+      return { data: { user }, error }
+    },
+    signInWithGoogle: async () => {
+      const { user, error } = await firebaseAuth.signInWithGoogle()
+      return { data: { user }, error }
+    },
+    signInWithGitHub: async () => {
+      const { user, error } = await firebaseAuth.signInWithGitHub()
+      return { data: { user }, error }
+    },
+    signOut: async () => {
+      const { error } = await firebaseAuth.signOut()
+      return { error }
+    },
+    resetPassword: async (email) => {
+      const { error } = await firebaseAuth.resetPassword(email)
+      return { data: {}, error }
+    }
   }
 
   return (
