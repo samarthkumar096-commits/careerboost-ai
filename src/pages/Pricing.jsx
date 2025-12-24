@@ -1,170 +1,214 @@
-import { ArrowLeft, Check, Crown, Zap } from 'lucide-react'
-import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
-import Navigation from '../components/Navigation'
-import { pricingPlans, stripePromise, createCheckoutSession } from '../config/stripe'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
+import { Check, Crown, Zap, ArrowLeft, Loader2 } from 'lucide-react'
+import { paymentPlans, initiateRazorpayPayment } from '../lib/razorpay'
 
 export default function Pricing() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [loading, setLoading] = useState(null)
 
-  const handleSubscribe = async (priceId, planName) => {
-    if (!priceId) return
-    
-    setLoading(planName)
-    try {
-      const stripe = await stripePromise
-      const session = await createCheckoutSession(priceId)
-      
-      const result = await stripe.redirectToCheckout({
-        sessionId: session.id,
-      })
+  const handlePayment = async (planId) => {
+    if (!user) {
+      alert('Please login first!')
+      navigate('/login')
+      return
+    }
 
-      if (result.error) {
-        alert(result.error.message)
+    setLoading(planId)
+
+    try {
+      const result = await initiateRazorpayPayment(
+        planId,
+        user.email,
+        user.user_metadata?.full_name || user.email
+      )
+
+      if (result.success) {
+        alert('🎉 Payment successful! Welcome to Pro!')
+        // Here you would update user's subscription status
+        navigate('/')
+      } else {
+        alert(`Payment failed: ${result.error}`)
       }
     } catch (error) {
-      console.error('Payment error:', error)
-      alert('Payment failed. Please try again.')
+      alert(`Error: ${error.message}`)
     } finally {
       setLoading(null)
     }
   }
 
+  const plans = [
+    {
+      ...paymentPlans.monthly,
+      icon: Zap,
+      color: 'from-blue-500 to-cyan-500',
+      popular: false
+    },
+    {
+      ...paymentPlans.yearly,
+      icon: Crown,
+      color: 'from-purple-500 to-pink-500',
+      popular: true,
+      badge: 'SAVE 17%'
+    },
+    {
+      ...paymentPlans.lifetime,
+      icon: Crown,
+      color: 'from-orange-500 to-red-500',
+      popular: false,
+      badge: 'BEST VALUE'
+    }
+  ]
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 pb-20">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 py-12 px-4">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
         <button 
           onClick={() => navigate('/')}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6"
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-8"
         >
           <ArrowLeft className="w-5 h-5" />
-          Back
+          Back to Home
         </button>
 
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Choose Your Plan</h1>
-          <p className="text-gray-600 text-lg">Unlock your career potential with AI-powered tools</p>
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            Choose Your Plan
+          </h1>
+          <p className="text-xl text-gray-600">
+            Unlock unlimited AI-powered resume building
+          </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          {/* Free Plan */}
-          <div className="bg-white rounded-2xl p-8 shadow-sm border-2 border-gray-200">
-            <div className="text-center mb-6">
-              <h3 className="text-2xl font-bold mb-2">{pricingPlans.free.name}</h3>
-              <div className="text-4xl font-bold mb-2">
-                {pricingPlans.free.currency}{pricingPlans.free.price}
-              </div>
-              <p className="text-gray-600">Forever free</p>
-            </div>
-            
-            <ul className="space-y-3 mb-8">
-              {pricingPlans.free.features.map((feature, index) => (
-                <li key={index} className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-700">{feature}</span>
-                </li>
-              ))}
-            </ul>
-
-            <button 
-              onClick={() => navigate('/')}
-              className="w-full py-3 rounded-lg border-2 border-gray-300 font-semibold hover:bg-gray-50 transition"
+        {/* Pricing Cards */}
+        <div className="grid md:grid-cols-3 gap-8 mb-12">
+          {plans.map((plan) => (
+            <div
+              key={plan.id}
+              className={`relative bg-white rounded-2xl shadow-xl p-8 ${
+                plan.popular ? 'ring-4 ring-purple-500 scale-105' : ''
+              }`}
             >
-              Current Plan
-            </button>
-          </div>
+              {/* Popular Badge */}
+              {plan.badge && (
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                  <span className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-1 rounded-full text-sm font-bold">
+                    {plan.badge}
+                  </span>
+                </div>
+              )}
 
-          {/* Pro Plan */}
-          <div className="bg-gradient-to-br from-purple-600 to-blue-600 rounded-2xl p-8 shadow-xl border-2 border-purple-400 relative transform scale-105">
-            <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-              <span className="bg-yellow-400 text-purple-900 px-4 py-1 rounded-full text-sm font-bold">
-                MOST POPULAR
-              </span>
+              {/* Icon */}
+              <div className={`w-16 h-16 bg-gradient-to-r ${plan.color} rounded-xl flex items-center justify-center mb-6`}>
+                <plan.icon className="w-8 h-8 text-white" />
+              </div>
+
+              {/* Plan Name */}
+              <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+              <p className="text-gray-600 mb-6">{plan.description}</p>
+
+              {/* Price */}
+              <div className="mb-6">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl font-bold">₹{plan.price}</span>
+                  <span className="text-gray-600">
+                    {plan.id === 'monthly' ? '/month' : plan.id === 'yearly' ? '/year' : 'one-time'}
+                  </span>
+                </div>
+                {plan.id === 'yearly' && (
+                  <p className="text-sm text-green-600 mt-2">Save ₹588 per year!</p>
+                )}
+              </div>
+
+              {/* Features */}
+              <ul className="space-y-3 mb-8">
+                {plan.features.map((feature, index) => (
+                  <li key={index} className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-700">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* CTA Button */}
+              <button
+                onClick={() => handlePayment(plan.id)}
+                disabled={loading === plan.id}
+                className={`w-full py-3 rounded-lg font-semibold transition ${
+                  plan.popular
+                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700'
+                    : 'bg-gray-900 text-white hover:bg-gray-800'
+                } disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
+              >
+                {loading === plan.id ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  'Get Started'
+                )}
+              </button>
             </div>
-
-            <div className="text-center mb-6 text-white">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Crown className="w-6 h-6" />
-                <h3 className="text-2xl font-bold">{pricingPlans.pro.name}</h3>
-              </div>
-              <div className="text-4xl font-bold mb-2">
-                {pricingPlans.pro.currency}{pricingPlans.pro.price}
-              </div>
-              <p className="text-purple-100">Per month</p>
-            </div>
-            
-            <ul className="space-y-3 mb-8">
-              {pricingPlans.pro.features.map((feature, index) => (
-                <li key={index} className="flex items-start gap-2 text-white">
-                  <Check className="w-5 h-5 flex-shrink-0 mt-0.5" />
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-
-            <button 
-              onClick={() => handleSubscribe(pricingPlans.pro.priceId, 'pro')}
-              disabled={loading === 'pro'}
-              className="w-full py-3 rounded-lg bg-white text-purple-600 font-semibold hover:bg-gray-100 transition disabled:opacity-50"
-            >
-              {loading === 'pro' ? 'Processing...' : 'Upgrade to Pro'}
-            </button>
-          </div>
-
-          {/* Lifetime Plan */}
-          <div className="bg-white rounded-2xl p-8 shadow-sm border-2 border-yellow-400">
-            <div className="text-center mb-6">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <Zap className="w-6 h-6 text-yellow-600" />
-                <h3 className="text-2xl font-bold">{pricingPlans.lifetime.name}</h3>
-              </div>
-              <div className="text-4xl font-bold mb-2">
-                {pricingPlans.lifetime.currency}{pricingPlans.lifetime.price}
-              </div>
-              <p className="text-gray-600">One-time payment</p>
-            </div>
-            
-            <ul className="space-y-3 mb-8">
-              {pricingPlans.lifetime.features.map((feature, index) => (
-                <li key={index} className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-700">{feature}</span>
-                </li>
-              ))}
-            </ul>
-
-            <button 
-              onClick={() => handleSubscribe(pricingPlans.lifetime.priceId, 'lifetime')}
-              disabled={loading === 'lifetime'}
-              className="w-full py-3 rounded-lg bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-semibold hover:from-yellow-500 hover:to-orange-600 transition disabled:opacity-50"
-            >
-              {loading === 'lifetime' ? 'Processing...' : 'Get Lifetime Access'}
-            </button>
-          </div>
+          ))}
         </div>
 
-        {/* FAQ Section */}
-        <div className="mt-16 max-w-3xl mx-auto">
-          <h2 className="text-2xl font-bold text-center mb-8">Frequently Asked Questions</h2>
+        {/* Payment Methods */}
+        <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
+          <h3 className="text-xl font-bold mb-4 text-center">Accepted Payment Methods</h3>
+          <div className="flex flex-wrap justify-center gap-6 items-center">
+            <div className="text-center">
+              <div className="text-3xl mb-2">💳</div>
+              <p className="text-sm text-gray-600">Credit/Debit Cards</p>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl mb-2">📱</div>
+              <p className="text-sm text-gray-600">UPI</p>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl mb-2">🏦</div>
+              <p className="text-sm text-gray-600">Net Banking</p>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl mb-2">👛</div>
+              <p className="text-sm text-gray-600">Wallets</p>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl mb-2">🌍</div>
+              <p className="text-sm text-gray-600">International Cards</p>
+            </div>
+          </div>
+          <p className="text-center text-sm text-gray-500 mt-4">
+            Powered by Razorpay - Secure & Trusted
+          </p>
+        </div>
+
+        {/* FAQ */}
+        <div className="bg-white rounded-2xl shadow-lg p-8">
+          <h3 className="text-2xl font-bold mb-6 text-center">Frequently Asked Questions</h3>
           <div className="space-y-4">
-            <div className="bg-white rounded-xl p-6">
-              <h3 className="font-semibold mb-2">Can I cancel anytime?</h3>
-              <p className="text-gray-600">Yes, you can cancel your Pro subscription anytime. No questions asked.</p>
+            <div>
+              <h4 className="font-semibold mb-2">Can I cancel anytime?</h4>
+              <p className="text-gray-600">Yes! You can cancel your subscription anytime. No questions asked.</p>
             </div>
-            <div className="bg-white rounded-xl p-6">
-              <h3 className="font-semibold mb-2">What payment methods do you accept?</h3>
-              <p className="text-gray-600">We accept all major credit cards, debit cards, and digital wallets through Stripe.</p>
+            <div>
+              <h4 className="font-semibold mb-2">Do you offer refunds?</h4>
+              <p className="text-gray-600">Yes, we offer a 7-day money-back guarantee if you're not satisfied.</p>
             </div>
-            <div className="bg-white rounded-xl p-6">
-              <h3 className="font-semibold mb-2">Is my payment information secure?</h3>
-              <p className="text-gray-600">Yes! We use Stripe for payment processing, which is PCI compliant and highly secure.</p>
+            <div>
+              <h4 className="font-semibold mb-2">Is payment secure?</h4>
+              <p className="text-gray-600">Absolutely! We use Razorpay, which is PCI DSS compliant and trusted by millions.</p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-2">Can I upgrade/downgrade later?</h4>
+              <p className="text-gray-600">Yes, you can change your plan anytime from your account settings.</p>
             </div>
           </div>
         </div>
       </div>
-
-      <Navigation />
     </div>
   )
 }
