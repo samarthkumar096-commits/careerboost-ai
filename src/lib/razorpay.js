@@ -12,7 +12,7 @@ export const loadRazorpay = () => {
 }
 
 // Razorpay configuration
-const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_your_key_here'
+const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_RvMV8TCAdy3ugd'
 
 // Payment plans
 export const paymentPlans = {
@@ -101,6 +101,7 @@ export const initiateRazorpayPayment = async (planId, userEmail, userName) => {
       currency: order.currency,
       name: 'CareerBoost AI',
       description: plan.description,
+      image: 'https://your-logo-url.com/logo.png', // Add your logo
       order_id: order.orderId,
       prefill: {
         name: userName || '',
