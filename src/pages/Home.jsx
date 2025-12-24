@@ -1,184 +1,204 @@
-import { FileText, Mail, Award, Sparkles, Crown, Smartphone, LogIn, UserCircle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import Navigation from '../components/Navigation'
+import { FileText, Target, Download, Sparkles, Crown, LogOut, User } from 'lucide-react'
 
 export default function Home() {
   const navigate = useNavigate()
   const { user, signOut } = useAuth()
 
+  const handleSignOut = async () => {
+    await signOut()
+    navigate('/login')
+  }
+
   const features = [
     {
       icon: FileText,
-      title: 'Create Resume',
-      description: 'Build ATS-friendly resumes with AI',
-      onClick: () => navigate('/resume')
+      title: 'AI Resume Builder',
+      description: 'Create professional, ATS-optimized resumes in minutes with AI',
+      color: 'from-purple-500 to-pink-500',
+      link: '/resume-builder'
     },
     {
-      icon: Mail,
-      title: 'Cover Letter',
-      description: 'Generate professional cover letters',
-      onClick: () => {}
+      icon: Target,
+      title: 'ATS Score Checker',
+      description: 'Check how well your resume matches job descriptions',
+      color: 'from-blue-500 to-cyan-500',
+      link: '/ats-checker'
     },
     {
-      icon: Award,
-      title: 'ATS Score',
-      description: 'Check your resume compatibility',
-      onClick: () => navigate('/ats-score')
-    },
-    {
-      icon: Sparkles,
-      title: 'AI Optimizer',
-      description: 'Enhance your resume with AI tips',
-      onClick: () => {}
+      icon: Download,
+      title: 'Multiple Formats',
+      description: 'Download your resume in PDF, DOCX, and TXT formats',
+      color: 'from-green-500 to-emerald-500',
+      link: '/resume-builder'
     }
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">CareerBoost AI</h1>
-            <p className="text-gray-600">Your AI Career Partner</p>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
+      {/* Navigation */}
+      <nav className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-8 h-8 text-purple-600" />
+            <span className="text-2xl font-bold">CareerBoost AI</span>
           </div>
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => navigate('/download')}
-              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-            >
-              <Smartphone className="w-4 h-4" />
-              <span>Download App</span>
-            </button>
-            
+          
+          <div className="flex items-center gap-4">
             {user ? (
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm">
-                  <UserCircle className="w-5 h-5 text-purple-600" />
-                  <span className="text-sm font-semibold hidden sm:inline">{user.email}</span>
+              <>
+                <div className="flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg">
+                  <User className="w-4 h-4" />
+                  <span className="text-sm font-semibold">
+                    {user.user_metadata?.full_name || user.email}
+                  </span>
                 </div>
                 <button
-                  onClick={signOut}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-semibold"
+                  onClick={handleSignOut}
+                  className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-900"
                 >
+                  <LogOut className="w-4 h-4" />
                   Sign Out
                 </button>
-              </div>
+              </>
             ) : (
-              <div className="flex items-center gap-2">
+              <>
                 <button
                   onClick={() => navigate('/login')}
-                  className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 transition font-semibold"
+                  className="px-6 py-2 text-gray-700 hover:text-gray-900 font-semibold"
                 >
-                  <LogIn className="w-4 h-4" />
-                  <span className="hidden sm:inline">Login</span>
+                  Login
                 </button>
                 <button
                   onClick={() => navigate('/signup')}
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-semibold"
+                  className="px-6 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700"
                 >
                   Sign Up
                 </button>
-              </div>
+              </>
             )}
+          </div>
+        </div>
+      </nav>
+
+      {/* Hero Section */}
+      <div className="max-w-7xl mx-auto px-4 py-20">
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 px-4 py-2 rounded-full mb-6">
+            <Sparkles className="w-4 h-4" />
+            <span className="text-sm font-semibold">Powered by Google Gemini AI</span>
+          </div>
+          
+          <h1 className="text-5xl md:text-7xl font-bold mb-6">
+            Build Your Perfect Resume
+            <br />
+            <span className="bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              With AI
+            </span>
+          </h1>
+          
+          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            Create professional, ATS-optimized resumes in minutes. 
+            Get hired faster with AI-powered resume building and optimization.
+          </p>
+
+          <div className="flex flex-wrap gap-4 justify-center">
+            <button
+              onClick={() => navigate('/resume-builder')}
+              className="px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition flex items-center gap-2"
+            >
+              <Sparkles className="w-5 h-5" />
+              Start Building Resume
+            </button>
+            
+            <button
+              onClick={() => navigate('/ats-checker')}
+              className="px-8 py-4 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition border-2 border-gray-300"
+            >
+              Check ATS Score
+            </button>
+          </div>
+        </div>
+
+        {/* Features Grid */}
+        <div className="grid md:grid-cols-3 gap-8 mb-16">
+          {features.map((feature, index) => (
+            <div
+              key={index}
+              onClick={() => navigate(feature.link)}
+              className="bg-white rounded-2xl p-8 shadow-xl hover:shadow-2xl transition cursor-pointer group"
+            >
+              <div className={`w-16 h-16 bg-gradient-to-r ${feature.color} rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition`}>
+                <feature.icon className="w-8 h-8 text-white" />
+              </div>
+              <h3 className="text-2xl font-bold mb-3">{feature.title}</h3>
+              <p className="text-gray-600">{feature.description}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA Section */}
+        <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-3xl p-12 text-center text-white">
+          <Crown className="w-16 h-16 mx-auto mb-6" />
+          <h2 className="text-4xl font-bold mb-4">
+            Ready to Get Hired?
+          </h2>
+          <p className="text-xl mb-8 opacity-90">
+            Join thousands of job seekers who landed their dream jobs
+          </p>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <button
+              onClick={() => navigate('/pricing')}
+              className="px-8 py-4 bg-white text-purple-600 rounded-lg font-semibold hover:bg-gray-100 transition"
+            >
+              View Pricing
+            </button>
+            <button
+              onClick={() => navigate('/resume-builder')}
+              className="px-8 py-4 bg-purple-700 text-white rounded-lg font-semibold hover:bg-purple-800 transition"
+            >
+              Try For Free
+            </button>
           </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          <div className="bg-white rounded-xl p-6 text-center shadow-sm">
-            <div className="text-4xl font-bold text-blue-600 mb-2">0</div>
-            <div className="text-gray-600 text-sm">Resumes</div>
+        <div className="grid md:grid-cols-4 gap-8 mt-16">
+          <div className="text-center">
+            <p className="text-4xl font-bold text-purple-600 mb-2">10K+</p>
+            <p className="text-gray-600">Resumes Created</p>
           </div>
-          <div className="bg-white rounded-xl p-6 text-center shadow-sm">
-            <div className="text-4xl font-bold text-green-600 mb-2">0</div>
-            <div className="text-gray-600 text-sm">Cover Letters</div>
+          <div className="text-center">
+            <p className="text-4xl font-bold text-blue-600 mb-2">95%</p>
+            <p className="text-gray-600">ATS Pass Rate</p>
           </div>
-          <div className="bg-white rounded-xl p-6 text-center shadow-sm">
-            <div className="text-2xl font-bold text-yellow-600 mb-2">--</div>
-            <div className="text-gray-600 text-sm">ATS Score</div>
+          <div className="text-center">
+            <p className="text-4xl font-bold text-green-600 mb-2">5K+</p>
+            <p className="text-gray-600">Happy Users</p>
           </div>
-        </div>
-
-        {/* Download Banner (Mobile Only) */}
-        <div 
-          onClick={() => navigate('/download')}
-          className="md:hidden bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl p-6 mb-8 text-white flex items-center justify-between cursor-pointer hover:shadow-xl transition-all"
-        >
-          <div className="flex items-center gap-3">
-            <Smartphone className="w-8 h-8" />
-            <div>
-              <h3 className="font-semibold text-lg">Get Android App</h3>
-              <p className="text-sm opacity-90">Build resumes on the go!</p>
-            </div>
+          <div className="text-center">
+            <p className="text-4xl font-bold text-orange-600 mb-2">24/7</p>
+            <p className="text-gray-600">AI Support</p>
           </div>
-          <button className="bg-white text-green-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition">
-            →
-          </button>
-        </div>
-
-        {/* Pro Banner */}
-        <div 
-          onClick={() => navigate('/pricing')}
-          className="bg-gradient-to-r from-purple-500 to-blue-500 rounded-2xl p-6 mb-8 text-white flex items-center justify-between cursor-pointer hover:shadow-xl transition-all"
-        >
-          <div className="flex items-center gap-3">
-            <Crown className="w-8 h-8" />
-            <div>
-              <h3 className="font-semibold text-lg">Upgrade to Pro</h3>
-              <p className="text-sm opacity-90">Unlimited AI generations & premium templates</p>
-            </div>
-          </div>
-          <button className="bg-white text-purple-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition">
-            →
-          </button>
-        </div>
-
-        {/* Features */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">What would you like to create?</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-            {features.map((feature, index) => (
-              <button
-                key={index}
-                onClick={feature.onClick}
-                className="bg-white rounded-xl p-6 text-left hover:shadow-lg transition-all duration-200 border border-gray-200 hover:border-purple-300"
-              >
-                <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center mb-4">
-                  <feature.icon className="w-6 h-6 text-blue-600" />
-                </div>
-                <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
-                <p className="text-gray-600 text-sm">{feature.description}</p>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Recent Activity */}
-        <div className="bg-white rounded-xl p-8 text-center mb-20">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <FileText className="w-8 h-8 text-gray-400" />
-          </div>
-          <h3 className="font-semibold text-lg mb-2">Recent Activity</h3>
-          <p className="text-gray-600">
-            {user 
-              ? "No documents yet. Create your first resume to get started!"
-              : "Sign in to see your recent activity and saved resumes"
-            }
-          </p>
-          {!user && (
-            <button
-              onClick={() => navigate('/login')}
-              className="mt-4 px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-semibold"
-            >
-              Sign In Now
-            </button>
-          )}
         </div>
       </div>
 
-      <Navigation />
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <Sparkles className="w-6 h-6" />
+            <span className="text-xl font-bold">CareerBoost AI</span>
+          </div>
+          <p className="text-gray-400 mb-4">
+            Powered by Google Gemini AI
+          </p>
+          <p className="text-gray-500 text-sm">
+            © 2024 CareerBoost AI. All rights reserved.
+          </p>
+        </div>
+      </footer>
     </div>
   )
 }
