@@ -4,6 +4,8 @@ import { loadStripe } from '@stripe/stripe-js'
 export const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY)
 
 // Pricing plans
+// TODO: Replace priceId values with actual Price IDs from Stripe Dashboard
+// Get them from: https://dashboard.stripe.com/test/products
 export const pricingPlans = {
   free: {
     name: 'Free',
@@ -18,7 +20,7 @@ export const pricingPlans = {
   pro: {
     name: 'Pro',
     price: 999,
-    priceId: 'price_pro_monthly', // Replace with actual Stripe price ID
+    priceId: 'price_REPLACE_WITH_YOUR_PRO_PRICE_ID', // TODO: Replace this with actual Price ID from Stripe
     features: [
       'Unlimited Resumes',
       'Unlimited Cover Letters',
@@ -31,7 +33,7 @@ export const pricingPlans = {
   lifetime: {
     name: 'Lifetime',
     price: 4999,
-    priceId: 'price_lifetime', // Replace with actual Stripe price ID
+    priceId: 'price_REPLACE_WITH_YOUR_LIFETIME_PRICE_ID', // TODO: Replace this with actual Price ID from Stripe
     features: [
       'Everything in Pro',
       'Lifetime access',
