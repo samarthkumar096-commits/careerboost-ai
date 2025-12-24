@@ -1,9 +1,11 @@
-import { FileText, Mail, Award, Sparkles, Crown, Smartphone } from 'lucide-react'
+import { FileText, Mail, Award, Sparkles, Crown, Smartphone, LogIn, UserCircle } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 import Navigation from '../components/Navigation'
 
 export default function Home() {
   const navigate = useNavigate()
+  const { user, signOut } = useAuth()
 
   const features = [
     {
@@ -41,13 +43,46 @@ export default function Home() {
             <h1 className="text-3xl font-bold text-gray-900">CareerBoost AI</h1>
             <p className="text-gray-600">Your AI Career Partner</p>
           </div>
-          <button 
-            onClick={() => navigate('/download')}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
-          >
-            <Smartphone className="w-4 h-4" />
-            <span className="hidden sm:inline">Download App</span>
-          </button>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => navigate('/download')}
+              className="hidden sm:flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+            >
+              <Smartphone className="w-4 h-4" />
+              <span>Download App</span>
+            </button>
+            
+            {user ? (
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg shadow-sm">
+                  <UserCircle className="w-5 h-5 text-purple-600" />
+                  <span className="text-sm font-semibold hidden sm:inline">{user.email}</span>
+                </div>
+                <button
+                  onClick={signOut}
+                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-semibold"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => navigate('/login')}
+                  className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-purple-600 text-purple-600 rounded-lg hover:bg-purple-50 transition font-semibold"
+                >
+                  <LogIn className="w-4 h-4" />
+                  <span className="hidden sm:inline">Login</span>
+                </button>
+                <button
+                  onClick={() => navigate('/signup')}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-semibold"
+                >
+                  Sign Up
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Stats */}
@@ -126,7 +161,20 @@ export default function Home() {
             <FileText className="w-8 h-8 text-gray-400" />
           </div>
           <h3 className="font-semibold text-lg mb-2">Recent Activity</h3>
-          <p className="text-gray-600">No documents yet. Create your first resume to get started!</p>
+          <p className="text-gray-600">
+            {user 
+              ? "No documents yet. Create your first resume to get started!"
+              : "Sign in to see your recent activity and saved resumes"
+            }
+          </p>
+          {!user && (
+            <button
+              onClick={() => navigate('/login')}
+              className="mt-4 px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-semibold"
+            >
+              Sign In Now
+            </button>
+          )}
         </div>
       </div>
 
