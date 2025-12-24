@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { Mail, Lock, Github, Chrome, ArrowLeft } from 'lucide-react'
+import { Mail, Lock, Github, Chrome, ArrowLeft, AlertCircle } from 'lucide-react'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -16,12 +16,52 @@ export default function Login() {
     setError('')
     setLoading(true)
 
+    // Validation
+    if (!email || !password) {
+      setError('Please enter both email and password')
+      setLoading(false)
+      return
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters')
+      setLoading(false)
+      return
+    }
+
     try {
-      const { error } = await signIn(email, password)
-      if (error) throw error
-      navigate('/')
+      console.log('Attempting login with:', email)
+      const { data, error: signInError } = await signIn(email, password)
+      
+      console.log('Login response:', { data, error: signInError })
+
+      if (signInError) {
+        console.error('Login error:', signInError)
+        
+        // Better error messages
+        if (signInError.message.includes('Invalid login credentials')) {
+          setError('Invalid email or password. Please check and try again.')
+        } else if (signInError.message.includes('Email not confirmed')) {
+          setError('Please verify your email first. Check your inbox.')
+        } else if (signInError.message.includes('User not found')) {
+          setError('No account found with this email. Please sign up first.')
+        } else {
+          setError(signInError.message)
+        }
+        setLoading(false)
+        return
+      }
+
+      if (data?.user) {
+        console.log('Login successful!', data.user)
+        alert('✅ Login successful!')
+        navigate('/')
+      } else {
+        setError('Login failed. Please try again.')
+      }
     } catch (error) {
-      setError(error.message)
+      console.error('Unexpected error:', error)
+      setError('An unexpected error occurred. Please try again.')
     } finally {
       setLoading(false)
     }
@@ -67,10 +107,25 @@ export default function Login() {
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
-              {error}
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-red-700 text-sm font-semibold mb-1">Login Failed</p>
+                <p className="text-red-600 text-sm">{error}</p>
+              </div>
             </div>
           )}
+
+          {/* Info Message */}
+          <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-blue-800 text-sm">
+              <strong>💡 First time?</strong> Please{' '}
+              <Link to="/signup" className="underline font-semibold">
+                sign up
+              </Link>{' '}
+              first before logging in.
+            </p>
+          </div>
 
           {/* Social Login */}
           <div className="space-y-3 mb-6">
@@ -128,9 +183,11 @@ export default function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  minLength={6}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent"
                 />
               </div>
+              <p className="text-xs text-gray-500 mt-1">Minimum 6 characters</p>
             </div>
 
             <div className="flex items-center justify-between text-sm">
@@ -159,6 +216,15 @@ export default function Login() {
               Sign up
             </Link>
           </p>
+        </div>
+
+        {/* Debug Info (Remove in production) */}
+        <div className="mt-4 p-4 bg-gray-100 rounded-lg text-xs">
+          <p className="font-semibold mb-2">🔍 Debug Info:</p>
+          <p>Email: {email || 'Not entered'}</p>
+          <p>Password: {password ? '••••••' : 'Not entered'}</p>
+          <p>Loading: {loading ? 'Yes' : 'No'}</p>
+          <p className="mt-2 text-gray-600">Check browser console (F12) for detailed logs</p>
         </div>
 
         {/* Footer */}
