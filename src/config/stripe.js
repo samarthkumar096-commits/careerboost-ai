@@ -10,6 +10,7 @@ export const pricingPlans = {
   free: {
     name: 'Free',
     price: 0,
+    currency: '$',
     features: [
       '1 Resume per month',
       '1 Cover Letter per month',
@@ -19,7 +20,8 @@ export const pricingPlans = {
   },
   pro: {
     name: 'Pro',
-    price: 999,
+    price: 9,
+    currency: '$',
     priceId: 'price_REPLACE_WITH_YOUR_PRO_PRICE_ID', // TODO: Replace this with actual Price ID from Stripe
     features: [
       'Unlimited Resumes',
@@ -32,7 +34,8 @@ export const pricingPlans = {
   },
   lifetime: {
     name: 'Lifetime',
-    price: 4999,
+    price: 49,
+    currency: '$',
     priceId: 'price_REPLACE_WITH_YOUR_LIFETIME_PRICE_ID', // TODO: Replace this with actual Price ID from Stripe
     features: [
       'Everything in Pro',
