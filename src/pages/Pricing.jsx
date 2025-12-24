@@ -52,7 +52,9 @@ export default function Pricing() {
           <div className="bg-white rounded-2xl p-8 shadow-sm border-2 border-gray-200">
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold mb-2">{pricingPlans.free.name}</h3>
-              <div className="text-4xl font-bold mb-2">₹{pricingPlans.free.price}</div>
+              <div className="text-4xl font-bold mb-2">
+                {pricingPlans.free.currency}{pricingPlans.free.price}
+              </div>
               <p className="text-gray-600">Forever free</p>
             </div>
             
@@ -86,7 +88,9 @@ export default function Pricing() {
                 <Crown className="w-6 h-6" />
                 <h3 className="text-2xl font-bold">{pricingPlans.pro.name}</h3>
               </div>
-              <div className="text-4xl font-bold mb-2">₹{pricingPlans.pro.price}</div>
+              <div className="text-4xl font-bold mb-2">
+                {pricingPlans.pro.currency}{pricingPlans.pro.price}
+              </div>
               <p className="text-purple-100">Per month</p>
             </div>
             
@@ -115,7 +119,9 @@ export default function Pricing() {
                 <Zap className="w-6 h-6 text-yellow-600" />
                 <h3 className="text-2xl font-bold">{pricingPlans.lifetime.name}</h3>
               </div>
-              <div className="text-4xl font-bold mb-2">₹{pricingPlans.lifetime.price}</div>
+              <div className="text-4xl font-bold mb-2">
+                {pricingPlans.lifetime.currency}{pricingPlans.lifetime.price}
+              </div>
               <p className="text-gray-600">One-time payment</p>
             </div>
             
@@ -148,7 +154,7 @@ export default function Pricing() {
             </div>
             <div className="bg-white rounded-xl p-6">
               <h3 className="font-semibold mb-2">What payment methods do you accept?</h3>
-              <p className="text-gray-600">We accept all major credit cards, debit cards, and UPI through Stripe.</p>
+              <p className="text-gray-600">We accept all major credit cards, debit cards, and digital wallets through Stripe.</p>
             </div>
             <div className="bg-white rounded-xl p-6">
               <h3 className="font-semibold mb-2">Is my payment information secure?</h3>
