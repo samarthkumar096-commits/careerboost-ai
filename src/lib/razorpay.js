@@ -14,13 +14,22 @@ export const loadRazorpay = () => {
 // Razorpay configuration
 const RAZORPAY_KEY = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_RvMV8TCAdy3ugd'
 
-// Payment plans
+// Detect user currency based on location (simplified)
+export const detectCurrency = () => {
+  // You can use IP geolocation API for accurate detection
+  // For now, defaulting to INR
+  const userCountry = navigator.language || 'en-IN'
+  return userCountry.includes('IN') ? 'INR' : 'USD'
+}
+
+// Payment plans with dual currency support
 export const paymentPlans = {
   monthly: {
     id: 'monthly',
     name: 'Pro Monthly',
-    price: 299, // ₹299/month
-    currency: 'INR',
+    priceINR: 299,
+    priceUSD: 3.99,
+    currency: 'INR', // Will be set dynamically
     description: 'Monthly subscription',
     features: [
       'Unlimited AI Resume Generation',
@@ -33,12 +42,13 @@ export const paymentPlans = {
   yearly: {
     id: 'yearly',
     name: 'Pro Yearly',
-    price: 2999, // ₹2999/year (Save ₹588!)
+    priceINR: 2999,
+    priceUSD: 39.99,
     currency: 'INR',
     description: 'Yearly subscription (Save 17%)',
     features: [
       'Everything in Monthly',
-      'Save ₹588 per year',
+      'Save 17% annually',
       'Early access to new features',
       'Dedicated support',
       'Lifetime updates'
@@ -47,7 +57,8 @@ export const paymentPlans = {
   lifetime: {
     id: 'lifetime',
     name: 'Lifetime Pro',
-    price: 4999, // ₹4999 one-time
+    priceINR: 4999,
+    priceUSD: 59.99,
     currency: 'INR',
     description: 'One-time payment, lifetime access',
     features: [
@@ -60,9 +71,24 @@ export const paymentPlans = {
   }
 }
 
-// Create Razorpay order
-export const createRazorpayOrder = async (planId, userEmail, userName) => {
+// Get plan with correct currency
+export const getPlanWithCurrency = (planId, currency = 'INR') => {
   const plan = paymentPlans[planId]
+  if (!plan) return null
+
+  return {
+    ...plan,
+    price: currency === 'USD' ? plan.priceUSD : plan.priceINR,
+    currency: currency,
+    displayPrice: currency === 'USD' 
+      ? `$${plan.priceUSD}` 
+      : `₹${plan.priceINR}`
+  }
+}
+
+// Create Razorpay order
+export const createRazorpayOrder = async (planId, userEmail, userName, currency = 'INR') => {
+  const plan = getPlanWithCurrency(planId, currency)
   
   if (!plan) {
     throw new Error('Invalid plan selected')
@@ -72,7 +98,7 @@ export const createRazorpayOrder = async (planId, userEmail, userName) => {
   // For now, returning mock order
   return {
     orderId: `order_${Date.now()}`,
-    amount: plan.price * 100, // Convert to paise
+    amount: plan.price * 100, // Convert to smallest unit (paise/cents)
     currency: plan.currency,
     planId: plan.id,
     planName: plan.name
@@ -80,7 +106,7 @@ export const createRazorpayOrder = async (planId, userEmail, userName) => {
 }
 
 // Initialize Razorpay payment
-export const initiateRazorpayPayment = async (planId, userEmail, userName) => {
+export const initiateRazorpayPayment = async (planId, userEmail, userName, currency = 'INR') => {
   // Load Razorpay script
   const loaded = await loadRazorpay()
   
@@ -91,8 +117,8 @@ export const initiateRazorpayPayment = async (planId, userEmail, userName) => {
 
   try {
     // Create order
-    const order = await createRazorpayOrder(planId, userEmail, userName)
-    const plan = paymentPlans[planId]
+    const order = await createRazorpayOrder(planId, userEmail, userName, currency)
+    const plan = getPlanWithCurrency(planId, currency)
 
     // Razorpay options
     const options = {
@@ -101,17 +127,16 @@ export const initiateRazorpayPayment = async (planId, userEmail, userName) => {
       currency: order.currency,
       name: 'CareerBoost AI',
       description: plan.description,
-      image: 'https://your-logo-url.com/logo.png', // Add your logo
+      image: 'https://your-logo-url.com/logo.png',
       order_id: order.orderId,
       prefill: {
         name: userName || '',
         email: userEmail || '',
       },
       theme: {
-        color: '#9333ea' // Purple theme
+        color: '#9333ea'
       },
       handler: function (response) {
-        // Payment successful
         return {
           success: true,
           paymentId: response.razorpay_payment_id,
@@ -136,7 +161,8 @@ export const initiateRazorpayPayment = async (planId, userEmail, userName) => {
           paymentId: response.razorpay_payment_id,
           orderId: response.razorpay_order_id,
           signature: response.razorpay_signature,
-          planId: planId
+          planId: planId,
+          currency: currency
         })
       })
 
@@ -159,7 +185,6 @@ export const initiateRazorpayPayment = async (planId, userEmail, userName) => {
 // Verify payment (call your backend)
 export const verifyRazorpayPayment = async (paymentId, orderId, signature) => {
   // In production, verify signature on backend
-  // For now, returning success
   return {
     verified: true,
     paymentId,
