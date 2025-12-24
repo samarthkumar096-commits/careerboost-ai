@@ -2,6 +2,7 @@ import express from 'express'
 import Stripe from 'stripe'
 import cors from 'cors'
 import dotenv from 'dotenv'
+import { generateResumeContent, generateCoverLetter, calculateATSScore } from './services/aiService.js'
 
 dotenv.config()
 
@@ -14,6 +15,57 @@ app.use(express.json())
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Server is running' })
+})
+
+// AI Resume Generation
+app.post('/api/generate-resume', async (req, res) => {
+  try {
+    const { formData } = req.body
+
+    if (!formData) {
+      return res.status(400).json({ error: 'Form data is required' })
+    }
+
+    const result = await generateResumeContent(formData)
+    res.json({ success: true, data: result })
+  } catch (error) {
+    console.error('Resume generation error:', error)
+    res.status(500).json({ error: 'Failed to generate resume', message: error.message })
+  }
+})
+
+// AI Cover Letter Generation
+app.post('/api/generate-cover-letter', async (req, res) => {
+  try {
+    const { jobTitle, companyName, resumeData } = req.body
+
+    if (!jobTitle || !companyName || !resumeData) {
+      return res.status(400).json({ error: 'Job title, company name, and resume data are required' })
+    }
+
+    const coverLetter = await generateCoverLetter(jobTitle, companyName, resumeData)
+    res.json({ success: true, coverLetter })
+  } catch (error) {
+    console.error('Cover letter generation error:', error)
+    res.status(500).json({ error: 'Failed to generate cover letter', message: error.message })
+  }
+})
+
+// ATS Score Calculator
+app.post('/api/calculate-ats-score', async (req, res) => {
+  try {
+    const { resumeText } = req.body
+
+    if (!resumeText) {
+      return res.status(400).json({ error: 'Resume text is required' })
+    }
+
+    const score = await calculateATSScore(resumeText)
+    res.json({ success: true, ...score })
+  } catch (error) {
+    console.error('ATS score calculation error:', error)
+    res.status(500).json({ error: 'Failed to calculate ATS score', message: error.message })
+  }
 })
 
 // Create Stripe checkout session
@@ -110,5 +162,6 @@ const PORT = process.env.PORT || 3000
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`)
-  console.log(`📝 Stripe webhook endpoint: http://localhost:${PORT}/api/webhook`)
+  console.log(`📝 AI Resume API ready`)
+  console.log(`💳 Stripe webhook endpoint: http://localhost:${PORT}/api/webhook`)
 })
