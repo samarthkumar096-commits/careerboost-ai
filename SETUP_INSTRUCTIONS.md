@@ -26,7 +26,7 @@ cd server
 touch .env
 ```
 
-Add your Stripe secret key (the one you provided):
+Add your Stripe secret key:
 ```env
 STRIPE_SECRET_KEY=your_secret_key_here
 STRIPE_WEBHOOK_SECRET=
@@ -38,25 +38,32 @@ PORT=3000
 
 Go to: https://dashboard.stripe.com/test/products
 
-#### Pro Plan (Monthly)
+#### Pro Plan (Monthly Subscription)
 - Click "+ Add product"
 - Name: `Pro Plan`
-- Price: `999 INR` (Recurring, Monthly)
-- Save and copy the **Price ID**
+- Description: `Monthly subscription with unlimited features`
+- Price: `$9.00 USD` (Recurring, Monthly)
+- Save and copy the **Price ID** (starts with `price_`)
 
-#### Lifetime Plan (One-time)
+#### Lifetime Plan (One-time Payment)
 - Click "+ Add product"
 - Name: `Lifetime Access`
-- Price: `4999 INR` (One time)
-- Save and copy the **Price ID**
+- Description: `One-time payment for lifetime access`
+- Price: `$49.00 USD` (One time)
+- Save and copy the **Price ID** (starts with `price_`)
 
 ### 4. Update Price IDs
 
 Edit `src/config/stripe.js` and replace:
+
 ```javascript
-priceId: 'price_REPLACE_WITH_YOUR_PRO_PRICE_ID'
+pro: {
+  priceId: 'price_YOUR_ACTUAL_PRO_PRICE_ID', // Replace with Pro plan Price ID
+},
+lifetime: {
+  priceId: 'price_YOUR_ACTUAL_LIFETIME_PRICE_ID', // Replace with Lifetime Price ID
+}
 ```
-with your actual Price IDs from Stripe.
 
 ### 5. Run the Application
 
@@ -64,45 +71,71 @@ with your actual Price IDs from Stripe.
 ```bash
 npm run dev
 ```
+Opens at: http://localhost:5173
 
 **Terminal 2 (Backend):**
 ```bash
 cd server
 npm run dev
 ```
+Runs at: http://localhost:3000
 
 ### 6. Test Payment
 
 1. Open http://localhost:5173
-2. Click "Upgrade to Pro"
-3. Use test card: `4242 4242 4242 4242`
-4. Expiry: Any future date (12/25)
-5. CVC: Any 3 digits (123)
+2. Click "Upgrade to Pro" banner
+3. Select a plan (Pro $9/month or Lifetime $49)
+4. Use Stripe test card: `4242 4242 4242 4242`
+5. Expiry: Any future date (e.g., 12/25)
+6. CVC: Any 3 digits (e.g., 123)
+7. Complete payment ✅
 
 ## 🧪 Stripe Test Cards
 
-- Success: `4242 4242 4242 4242`
-- Decline: `4000 0000 0000 0002`
-- 3D Secure: `4000 0025 0000 3155`
+- **Success:** `4242 4242 4242 4242`
+- **Decline:** `4000 0000 0000 0002`
+- **3D Secure:** `4000 0025 0000 3155`
+- **Insufficient funds:** `4000 0000 0000 9995`
 
-## 📋 Checklist
+## 💰 Pricing Plans
 
-- [ ] Installed dependencies
-- [ ] Created `server/.env` with secret key
-- [ ] Created products in Stripe Dashboard
+- **Free:** $0 - Limited features
+- **Pro:** $9/month - Unlimited everything
+- **Lifetime:** $49 one-time - Lifetime access
+
+## 📋 Setup Checklist
+
+- [ ] Cloned repository
+- [ ] Installed frontend dependencies (`npm install`)
+- [ ] Installed backend dependencies (`cd server && npm install`)
+- [ ] Created `server/.env` with Stripe secret key
+- [ ] Created Pro Plan product in Stripe Dashboard ($9/month)
+- [ ] Created Lifetime Plan product in Stripe Dashboard ($49)
+- [ ] Copied both Price IDs from Stripe
 - [ ] Updated Price IDs in `src/config/stripe.js`
-- [ ] Started frontend server
-- [ ] Started backend server
-- [ ] Tested payment successfully
+- [ ] Started frontend server (`npm run dev`)
+- [ ] Started backend server (`cd server && npm run dev`)
+- [ ] Tested payment with test card
+- [ ] Payment successful! 🎉
 
 ## 🚀 You're Ready!
 
-Your Stripe keys are already configured. Just:
-1. Create the products in Stripe Dashboard
-2. Update the Price IDs
+Your Stripe keys are configured. Just:
+1. Create the 2 products in Stripe Dashboard
+2. Copy and update the Price IDs
 3. Run both servers
 4. Start accepting payments!
 
+## 🔗 Important Links
+
+- Stripe Dashboard: https://dashboard.stripe.com
+- Test Products: https://dashboard.stripe.com/test/products
+- Test Logs: https://dashboard.stripe.com/test/logs
+- API Keys: https://dashboard.stripe.com/test/apikeys
+
 ## 📞 Need Help?
 
-Check Stripe Dashboard logs: https://dashboard.stripe.com/test/logs
+- Check Stripe Dashboard logs for payment errors
+- Check browser console for frontend errors
+- Check server terminal for backend errors
+- Verify Price IDs are correct in `src/config/stripe.js`
