@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { Check, Crown, Zap, ArrowLeft, Loader2 } from 'lucide-react'
-import { paymentPlans, initiateRazorpayPayment } from '../lib/razorpay'
+import { Check, Crown, Zap, ArrowLeft, Loader2, Globe } from 'lucide-react'
+import { paymentPlans, initiateRazorpayPayment, getPlanWithCurrency } from '../lib/razorpay'
 
 export default function Pricing() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [loading, setLoading] = useState(null)
+  const [currency, setCurrency] = useState('INR')
 
   const handlePayment = async (planId) => {
     if (!user) {
@@ -22,12 +23,12 @@ export default function Pricing() {
       const result = await initiateRazorpayPayment(
         planId,
         user.email,
-        user.user_metadata?.full_name || user.email
+        user.user_metadata?.full_name || user.email,
+        currency
       )
 
       if (result.success) {
         alert('🎉 Payment successful! Welcome to Pro!')
-        // Here you would update user's subscription status
         navigate('/')
       } else {
         alert(`Payment failed: ${result.error}`)
@@ -41,20 +42,20 @@ export default function Pricing() {
 
   const plans = [
     {
-      ...paymentPlans.monthly,
+      ...getPlanWithCurrency('monthly', currency),
       icon: Zap,
       color: 'from-blue-500 to-cyan-500',
       popular: false
     },
     {
-      ...paymentPlans.yearly,
+      ...getPlanWithCurrency('yearly', currency),
       icon: Crown,
       color: 'from-purple-500 to-pink-500',
       popular: true,
       badge: 'SAVE 17%'
     },
     {
-      ...paymentPlans.lifetime,
+      ...getPlanWithCurrency('lifetime', currency),
       icon: Crown,
       color: 'from-orange-500 to-red-500',
       popular: false,
@@ -74,13 +75,39 @@ export default function Pricing() {
           Back to Home
         </button>
 
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             Choose Your Plan
           </h1>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-gray-600 mb-6">
             Unlock unlimited AI-powered resume building
           </p>
+
+          {/* Currency Toggle */}
+          <div className="inline-flex items-center gap-3 bg-white rounded-full p-2 shadow-lg">
+            <button
+              onClick={() => setCurrency('INR')}
+              className={`flex items-center gap-2 px-6 py-2 rounded-full font-semibold transition ${
+                currency === 'INR'
+                  ? 'bg-purple-600 text-white'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <Globe className="w-4 h-4" />
+              INR (₹)
+            </button>
+            <button
+              onClick={() => setCurrency('USD')}
+              className={`flex items-center gap-2 px-6 py-2 rounded-full font-semibold transition ${
+                currency === 'USD'
+                  ? 'bg-purple-600 text-white'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <Globe className="w-4 h-4" />
+              USD ($)
+            </button>
+          </div>
         </div>
 
         {/* Pricing Cards */}
@@ -113,13 +140,15 @@ export default function Pricing() {
               {/* Price */}
               <div className="mb-6">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-bold">₹{plan.price}</span>
+                  <span className="text-4xl font-bold">{plan.displayPrice}</span>
                   <span className="text-gray-600">
                     {plan.id === 'monthly' ? '/month' : plan.id === 'yearly' ? '/year' : 'one-time'}
                   </span>
                 </div>
                 {plan.id === 'yearly' && (
-                  <p className="text-sm text-green-600 mt-2">Save ₹588 per year!</p>
+                  <p className="text-sm text-green-600 mt-2">
+                    {currency === 'INR' ? 'Save ₹588 per year!' : 'Save $8 per year!'}
+                  </p>
                 )}
               </div>
 
@@ -156,30 +185,58 @@ export default function Pricing() {
           ))}
         </div>
 
+        {/* Currency Info */}
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8 text-center">
+          <p className="text-blue-800">
+            <strong>💡 Tip:</strong> {currency === 'INR' 
+              ? 'Indian users can pay via UPI, Cards, Net Banking, and Wallets' 
+              : 'International users can pay via Credit/Debit cards (Visa, Mastercard, Amex)'}
+          </p>
+        </div>
+
         {/* Payment Methods */}
         <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
           <h3 className="text-xl font-bold mb-4 text-center">Accepted Payment Methods</h3>
           <div className="flex flex-wrap justify-center gap-6 items-center">
-            <div className="text-center">
-              <div className="text-3xl mb-2">💳</div>
-              <p className="text-sm text-gray-600">Credit/Debit Cards</p>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl mb-2">📱</div>
-              <p className="text-sm text-gray-600">UPI</p>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl mb-2">🏦</div>
-              <p className="text-sm text-gray-600">Net Banking</p>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl mb-2">👛</div>
-              <p className="text-sm text-gray-600">Wallets</p>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl mb-2">🌍</div>
-              <p className="text-sm text-gray-600">International Cards</p>
-            </div>
+            {currency === 'INR' ? (
+              <>
+                <div className="text-center">
+                  <div className="text-3xl mb-2">💳</div>
+                  <p className="text-sm text-gray-600">Credit/Debit Cards</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl mb-2">📱</div>
+                  <p className="text-sm text-gray-600">UPI</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl mb-2">🏦</div>
+                  <p className="text-sm text-gray-600">Net Banking</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl mb-2">👛</div>
+                  <p className="text-sm text-gray-600">Wallets</p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="text-center">
+                  <div className="text-3xl mb-2">💳</div>
+                  <p className="text-sm text-gray-600">Visa</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl mb-2">💳</div>
+                  <p className="text-sm text-gray-600">Mastercard</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl mb-2">💳</div>
+                  <p className="text-sm text-gray-600">Amex</p>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl mb-2">🌍</div>
+                  <p className="text-sm text-gray-600">International Cards</p>
+                </div>
+              </>
+            )}
           </div>
           <p className="text-center text-sm text-gray-500 mt-4">
             Powered by Razorpay - Secure & Trusted
@@ -203,8 +260,11 @@ export default function Pricing() {
               <p className="text-gray-600">Absolutely! We use Razorpay, which is PCI DSS compliant and trusted by millions.</p>
             </div>
             <div>
-              <h4 className="font-semibold mb-2">Can I upgrade/downgrade later?</h4>
-              <p className="text-gray-600">Yes, you can change your plan anytime from your account settings.</p>
+              <h4 className="font-semibold mb-2">Which currency should I choose?</h4>
+              <p className="text-gray-600">
+                Choose INR (₹) if you're in India for local payment methods. 
+                Choose USD ($) if you're international for card payments.
+              </p>
             </div>
           </div>
         </div>
