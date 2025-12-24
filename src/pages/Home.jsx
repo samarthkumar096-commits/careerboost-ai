@@ -1,4 +1,4 @@
-import { FileText, Mail, Award, Sparkles, Crown } from 'lucide-react'
+import { FileText, Mail, Award, Sparkles, Crown, Smartphone } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import Navigation from '../components/Navigation'
 
@@ -38,11 +38,15 @@ export default function Home() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">ResumeAI</h1>
+            <h1 className="text-3xl font-bold text-gray-900">CareerBoost AI</h1>
             <p className="text-gray-600">Your AI Career Partner</p>
           </div>
-          <button className="p-2 hover:bg-gray-200 rounded-full transition">
-            💡
+          <button 
+            onClick={() => navigate('/download')}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+          >
+            <Smartphone className="w-4 h-4" />
+            <span className="hidden sm:inline">Download App</span>
           </button>
         </div>
 
@@ -60,6 +64,23 @@ export default function Home() {
             <div className="text-2xl font-bold text-yellow-600 mb-2">--</div>
             <div className="text-gray-600 text-sm">ATS Score</div>
           </div>
+        </div>
+
+        {/* Download Banner (Mobile Only) */}
+        <div 
+          onClick={() => navigate('/download')}
+          className="md:hidden bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl p-6 mb-8 text-white flex items-center justify-between cursor-pointer hover:shadow-xl transition-all"
+        >
+          <div className="flex items-center gap-3">
+            <Smartphone className="w-8 h-8" />
+            <div>
+              <h3 className="font-semibold text-lg">Get Android App</h3>
+              <p className="text-sm opacity-90">Build resumes on the go!</p>
+            </div>
+          </div>
+          <button className="bg-white text-green-600 px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition">
+            →
+          </button>
         </div>
 
         {/* Pro Banner */}
