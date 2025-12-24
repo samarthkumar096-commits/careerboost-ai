@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { FileText, Target, Download, Sparkles, Crown, LogOut, User } from 'lucide-react'
+import { FileText, Target, Download, Sparkles, Crown, LogOut, User, Zap } from 'lucide-react'
 
 export default function Home() {
   const navigate = useNavigate()
@@ -86,8 +86,8 @@ export default function Home() {
       <div className="max-w-7xl mx-auto px-4 py-20">
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 bg-purple-100 text-purple-700 px-4 py-2 rounded-full mb-6">
-            <Sparkles className="w-4 h-4" />
-            <span className="text-sm font-semibold">Powered by Google Gemini AI</span>
+            <Zap className="w-4 h-4" />
+            <span className="text-sm font-semibold">Powered by DeepSeek AI - Faster & Smarter</span>
           </div>
           
           <h1 className="text-5xl md:text-7xl font-bold mb-6">
@@ -136,6 +136,34 @@ export default function Home() {
               <p className="text-gray-600">{feature.description}</p>
             </div>
           ))}
+        </div>
+
+        {/* Why DeepSeek Section */}
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-3xl p-12 text-white mb-16">
+          <div className="text-center mb-8">
+            <Zap className="w-16 h-16 mx-auto mb-4" />
+            <h2 className="text-4xl font-bold mb-4">
+              Why DeepSeek AI?
+            </h2>
+            <p className="text-xl opacity-90">
+              The most advanced AI for resume building
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="bg-white/10 backdrop-blur rounded-xl p-6">
+              <h3 className="text-xl font-bold mb-2">⚡ Lightning Fast</h3>
+              <p className="opacity-90">Generate resumes in seconds, not minutes</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur rounded-xl p-6">
+              <h3 className="text-xl font-bold mb-2">🎯 More Accurate</h3>
+              <p className="opacity-90">Better keyword matching and ATS optimization</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur rounded-xl p-6">
+              <h3 className="text-xl font-bold mb-2">💰 Cost Effective</h3>
+              <p className="opacity-90">More features at better prices</p>
+            </div>
+          </div>
         </div>
 
         {/* CTA Section */}
@@ -192,7 +220,7 @@ export default function Home() {
             <span className="text-xl font-bold">CareerBoost AI</span>
           </div>
           <p className="text-gray-400 mb-4">
-            Powered by Google Gemini AI
+            Powered by DeepSeek AI - The Future of Resume Building
           </p>
           <p className="text-gray-500 text-sm">
             © 2024 CareerBoost AI. All rights reserved.
