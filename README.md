@@ -2,7 +2,21 @@
 
 A modern web application for creating ATS-friendly resumes, cover letters, and optimizing your career documents with AI. Includes Stripe payment integration for Pro subscriptions.
 
-## Features
+## 🚀 Quick Deploy
+
+### Deploy Frontend (One-Click)
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/samarthkumar096-commits/careerboost-ai&env=VITE_STRIPE_PUBLIC_KEY,VITE_API_URL&envDescription=Stripe%20keys%20and%20API%20URL%20required&project-name=careerboost-ai&repository-name=careerboost-ai)
+
+[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/samarthkumar096-commits/careerboost-ai)
+
+### Deploy Backend
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/new)
+
+**After deployment, update environment variables with your Stripe keys!**
+
+## ✨ Features
 
 - **Create Resume**: Build ATS-friendly resumes with AI assistance
 - **Cover Letter Generator**: Generate professional cover letters
@@ -11,7 +25,13 @@ A modern web application for creating ATS-friendly resumes, cover letters, and o
 - **Pro Subscription**: Stripe-powered payment system with multiple plans
 - **Lifetime Access**: One-time payment option
 
-## Tech Stack
+## 💰 Pricing
+
+- **Free:** $0 - Limited features
+- **Pro:** $9/month - Unlimited everything
+- **Lifetime:** $49 - One-time payment
+
+## 🛠️ Tech Stack
 
 ### Frontend
 - **React 18** + Vite
@@ -25,7 +45,7 @@ A modern web application for creating ATS-friendly resumes, cover letters, and o
 - **Stripe API** for payments
 - **Webhook handling** for subscription events
 
-## Getting Started
+## 📦 Local Development
 
 ### Prerequisites
 
@@ -96,7 +116,7 @@ npm run dev
 
 Backend will run on `http://localhost:3000`
 
-## Stripe Configuration
+## 🔧 Stripe Configuration
 
 ### 1. Get Stripe API Keys
 
@@ -110,13 +130,13 @@ Go to Stripe Dashboard → Products and create:
 
 **Pro Plan (Monthly Subscription)**
 - Name: Pro Plan
-- Price: ₹999/month (or your preferred amount)
+- Price: $9.00/month
 - Billing period: Monthly
 - Copy the **Price ID** (starts with `price_`)
 
 **Lifetime Plan (One-time Payment)**
 - Name: Lifetime Access
-- Price: ₹4999 (or your preferred amount)
+- Price: $49.00 (one-time)
 - Billing period: One-time
 - Copy the **Price ID**
 
@@ -154,7 +174,7 @@ stripe listen --forward-to localhost:3000/api/webhook
 
 For production, add your production webhook endpoint in Stripe Dashboard.
 
-## Testing Payments
+## 🧪 Testing Payments
 
 Use Stripe test cards:
 - **Success**: `4242 4242 4242 4242`
@@ -163,7 +183,7 @@ Use Stripe test cards:
 
 Use any future expiry date and any 3-digit CVC.
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 careerboost-ai/
@@ -192,7 +212,7 @@ careerboost-ai/
 └── package.json        # Frontend dependencies
 ```
 
-## Available Scripts
+## 📜 Available Scripts
 
 ### Frontend
 - `npm run dev` - Start development server
@@ -203,26 +223,23 @@ careerboost-ai/
 - `npm run dev` - Start development server with nodemon
 - `npm start` - Start production server
 
-## API Endpoints
+## 🌐 API Endpoints
 
 - `GET /api/health` - Health check
 - `POST /api/create-checkout-session` - Create Stripe checkout session
 - `POST /api/webhook` - Handle Stripe webhook events
 - `POST /api/create-portal-session` - Create customer portal session
 
-## Deployment
+## 🚀 Deployment
 
-### Frontend (Vercel/Netlify)
-1. Build the project: `npm run build`
-2. Deploy the `dist` folder
-3. Add environment variables in hosting platform
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions.
 
-### Backend (Railway/Render/Heroku)
-1. Deploy the `server` folder
-2. Add environment variables
-3. Update `VITE_API_URL` in frontend to production URL
+### Quick Deploy Links
 
-## Environment Variables
+- **Frontend:** Deploy to [Vercel](https://vercel.com) or [Netlify](https://netlify.com)
+- **Backend:** Deploy to [Railway](https://railway.app) or [Render](https://render.com)
+
+## 🔐 Environment Variables
 
 ### Frontend (.env)
 ```
@@ -238,14 +255,24 @@ CLIENT_URL=http://localhost:5173
 PORT=3000
 ```
 
-## License
+## 📝 License
 
 MIT License
 
-## Author
+## 👨‍💻 Author
 
 Samarth Kumar
 
-## Support
+## 🆘 Support
 
 For issues or questions, please open an issue on GitHub.
+
+## 📚 Documentation
+
+- [Setup Instructions](./SETUP_INSTRUCTIONS.md) - Quick setup guide
+- [Deployment Guide](./DEPLOYMENT.md) - Deployment instructions
+- [Server Documentation](./server/README.md) - Backend setup
+
+## ⭐ Show Your Support
+
+Give a ⭐️ if this project helped you!
