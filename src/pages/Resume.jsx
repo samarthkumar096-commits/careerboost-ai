@@ -1,4 +1,4 @@
-import { ArrowLeft, Plus, Trash2, Download } from 'lucide-react'
+import { ArrowLeft, Plus, Trash2, Download, Sparkles } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import Navigation from '../components/Navigation'
@@ -6,6 +6,8 @@ import Navigation from '../components/Navigation'
 export default function Resume() {
   const navigate = useNavigate()
   const [step, setStep] = useState(1)
+  const [loading, setLoading] = useState(false)
+  const [generatedResume, setGeneratedResume] = useState(null)
   const [formData, setFormData] = useState({
     personalInfo: {
       fullName: '',
@@ -74,9 +76,77 @@ export default function Resume() {
     setFormData({ ...formData, skills: newSkills })
   }
 
-  const handleGenerate = () => {
-    alert('Resume generation coming soon! Your data has been saved.')
-    console.log('Resume Data:', formData)
+  const handleGenerate = async () => {
+    setLoading(true)
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/generate-resume`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ formData }),
+      })
+
+      const data = await response.json()
+      
+      if (data.success) {
+        setGeneratedResume(data.data)
+        alert('✅ Resume generated successfully! Check the preview below.')
+      } else {
+        throw new Error(data.error || 'Failed to generate resume')
+      }
+    } catch (error) {
+      console.error('Resume generation error:', error)
+      alert('❌ Failed to generate resume. Using basic format instead.')
+      // Fallback to basic format
+      setGeneratedResume({
+        summary: formData.summary,
+        experience: formData.experience,
+        suggestions: ['Add more details', 'Use action verbs', 'Quantify achievements']
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const downloadResume = () => {
+    const resumeText = `
+${formData.personalInfo.fullName}
+${formData.personalInfo.email} | ${formData.personalInfo.phone}
+${formData.personalInfo.location}
+${formData.personalInfo.linkedin ? 'LinkedIn: ' + formData.personalInfo.linkedin : ''}
+${formData.personalInfo.portfolio ? 'Portfolio: ' + formData.personalInfo.portfolio : ''}
+
+PROFESSIONAL SUMMARY
+${generatedResume?.summary || formData.summary}
+
+WORK EXPERIENCE
+${formData.experience.map(exp => `
+${exp.title} - ${exp.company}
+${exp.startDate} - ${exp.current ? 'Present' : exp.endDate}
+${exp.description}
+`).join('\n')}
+
+EDUCATION
+${formData.education.map(edu => `
+${edu.degree} - ${edu.school}
+Graduated: ${edu.graduationDate}
+${edu.gpa ? 'GPA: ' + edu.gpa : ''}
+`).join('\n')}
+
+SKILLS
+${formData.skills.join(' • ')}
+    `.trim()
+
+    const blob = new Blob([resumeText], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${formData.personalInfo.fullName.replace(/\s+/g, '_')}_Resume.txt`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
   }
 
   return (
@@ -387,7 +457,7 @@ export default function Resume() {
               {formData.skills.length === 0 ? (
                 <p className="text-gray-500 text-center py-8">No skills added yet. Click "Add Skill" to start.</p>
               ) : (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 mb-8">
                   {formData.skills.map((skill, index) => (
                     <div
                       key={index}
@@ -405,19 +475,59 @@ export default function Resume() {
                 </div>
               )}
 
-              <div className="mt-8 p-6 bg-blue-50 rounded-lg">
-                <h3 className="font-semibold mb-2">🎉 Ready to Generate!</h3>
+              <div className="mt-8 p-6 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border-2 border-purple-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <Sparkles className="w-6 h-6 text-purple-600" />
+                  <h3 className="font-semibold text-lg">AI-Powered Resume Ready!</h3>
+                </div>
                 <p className="text-gray-600 text-sm mb-4">
-                  Your resume is ready to be generated. Click the button below to create your ATS-friendly resume.
+                  Click below to generate your optimized, ATS-friendly resume with AI assistance.
                 </p>
                 <button
                   onClick={handleGenerate}
-                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 font-semibold"
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 font-semibold disabled:opacity-50"
                 >
-                  <Download className="w-5 h-5" />
-                  Generate Resume
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      Generating with AI...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-5 h-5" />
+                      Generate AI Resume
+                    </>
+                  )}
                 </button>
               </div>
+
+              {/* Generated Resume Preview */}
+              {generatedResume && (
+                <div className="mt-6 p-6 bg-white rounded-lg border-2 border-green-200">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-lg text-green-700">✅ Resume Generated!</h3>
+                    <button
+                      onClick={downloadResume}
+                      className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                    >
+                      <Download className="w-4 h-4" />
+                      Download
+                    </button>
+                  </div>
+                  
+                  {generatedResume.suggestions && (
+                    <div className="mb-4">
+                      <h4 className="font-semibold mb-2">💡 AI Suggestions:</h4>
+                      <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
+                        {generatedResume.suggestions.map((tip, i) => (
+                          <li key={i}>{tip}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
         </div>
