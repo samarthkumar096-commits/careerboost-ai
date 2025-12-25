@@ -1,0 +1,229 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
+import { Check, Crown, Zap, ArrowLeft, Loader2, Globe } from 'lucide-react'
+import { paymentPlans, getPlanWithCurrency, initiateRazorpayPayment } from '../lib/razorpay'
+import { PAYMENTS_ENABLED } from '../config/payment'
+
+export default function Pricing() {
+  const navigate = useNavigate()
+  const { user } = useAuth()
+  const [loading, setLoading] = useState(null)
+  const [currency, setCurrency] = useState('INR')
+
+  const handlePayment = async (planId) => {
+    if (!PAYMENTS_ENABLED) {
+      alert('🚧 Payment system is temporarily under maintenance. Please try again later.')
+      return
+    }
+
+    if (!user) {
+      alert('Please login first!')
+      navigate('/login')
+      return
+    }
+
+    setLoading(planId)
+
+    try {
+      const result = await initiateRazorpayPayment(
+        planId,
+        user.email,
+        user.user_metadata?.full_name || user.email,
+        currency
+      )
+
+      if (result.success) {
+        alert('✅ Payment successful! Welcome to Pro!')
+        // TODO: Update user subscription in database
+        navigate('/dashboard')
+      } else {
+        alert(`❌ Payment failed: ${result.error}`)
+      }
+    } catch (error) {
+      console.error('Payment error:', error)
+      alert(`❌ Error: ${error.message}`)
+    } finally {
+      setLoading(null)
+    }
+  }
+
+  const plans = [
+    {
+      ...getPlanWithCurrency('monthly', currency),
+      icon: Zap,
+      color: 'from-blue-500 to-cyan-500',
+      popular: false
+    },
+    {
+      ...getPlanWithCurrency('yearly', currency),
+      icon: Crown,
+      color: 'from-purple-500 to-pink-500',
+      popular: true,
+      badge: 'SAVE 17%'
+    },
+    {
+      ...getPlanWithCurrency('lifetime', currency),
+      icon: Crown,
+      color: 'from-orange-500 to-red-500',
+      popular: false,
+      badge: 'BEST VALUE'
+    }
+  ]
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 py-12 px-4">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <button 
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-8"
+        >
+          <ArrowLeft className="w-5 h-5" />
+          Back to Home
+        </button>
+
+        <div className="text-center mb-8">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">
+            Choose Your Plan
+          </h1>
+          <p className="text-xl text-gray-600 mb-6">
+            Unlock unlimited AI-powered resume building
+          </p>
+
+          {/* Currency Toggle */}
+          <div className="inline-flex items-center gap-3 bg-white rounded-full p-2 shadow-lg">
+            <button
+              onClick={() => setCurrency('INR')}
+              className={`flex items-center gap-2 px-6 py-2 rounded-full font-semibold transition ${
+                currency === 'INR'
+                  ? 'bg-purple-600 text-white'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <Globe className="w-4 h-4" />
+              INR (₹)
+            </button>
+            <button
+              onClick={() => setCurrency('USD')}
+              className={`flex items-center gap-2 px-6 py-2 rounded-full font-semibold transition ${
+                currency === 'USD'
+                  ? 'bg-purple-600 text-white'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <Globe className="w-4 h-4" />
+              USD ($)
+            </button>
+          </div>
+        </div>
+
+        {/* Pricing Cards */}
+        <div className="grid md:grid-cols-3 gap-8 mb-12">
+          {plans.map((plan) => (
+            <div
+              key={plan.id}
+              className={`relative bg-white rounded-2xl shadow-xl p-8 ${
+                plan.popular ? 'ring-4 ring-purple-500 scale-105' : ''
+              }`}
+            >
+              {/* Popular Badge */}
+              {plan.badge && (
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                  <span className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-4 py-1 rounded-full text-sm font-bold">
+                    {plan.badge}
+                  </span>
+                </div>
+              )}
+
+              {/* Icon */}
+              <div className={`w-16 h-16 bg-gradient-to-r ${plan.color} rounded-xl flex items-center justify-center mb-6`}>
+                <plan.icon className="w-8 h-8 text-white" />
+              </div>
+
+              {/* Plan Name */}
+              <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+              <p className="text-gray-600 mb-6">{plan.description}</p>
+
+              {/* Price */}
+              <div className="mb-6">
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl font-bold">{plan.displayPrice}</span>
+                  <span className="text-gray-600">
+                    {plan.id === 'monthly' ? '/month' : plan.id === 'yearly' ? '/year' : 'one-time'}
+                  </span>
+                </div>
+                {plan.id === 'yearly' && (
+                  <p className="text-sm text-green-600 mt-2">
+                    {currency === 'INR' ? 'Save ₹588 per year!' : 'Save $8 per year!'}
+                  </p>
+                )}
+              </div>
+
+              {/* Features */}
+              <ul className="space-y-3 mb-8">
+                {plan.features.map((feature, index) => (
+                  <li key={index} className="flex items-start gap-3">
+                    <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-gray-700">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              {/* CTA Button */}
+              <button
+                onClick={() => handlePayment(plan.id)}
+                disabled={loading === plan.id}
+                className={`w-full py-3 rounded-lg font-semibold transition ${
+                  plan.popular
+                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:from-purple-700 hover:to-pink-700'
+                    : 'bg-gray-900 text-white hover:bg-gray-800'
+                } disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2`}
+              >
+                {loading === plan.id ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  'Get Started'
+                )}
+              </button>
+            </div>
+          ))}
+        </div>
+
+        {/* Currency Info */}
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8 text-center">
+          <p className="text-blue-800">
+            <strong>💡 Tip:</strong> {currency === 'INR' 
+              ? 'Indian users can pay via UPI, Cards, Net Banking, and Wallets' 
+              : 'International users can pay via Credit/Debit cards (Visa, Mastercard, Amex)'}
+          </p>
+        </div>
+
+        {/* Payment Methods */}
+        <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+          <h3 className="text-xl font-bold mb-4">Accepted Payment Methods</h3>
+          <p className="text-gray-600 mb-4">Secure payments powered by Razorpay</p>
+          <div className="flex flex-wrap justify-center gap-4 items-center text-sm text-gray-500">
+            {currency === 'INR' ? (
+              <>
+                <span>💳 Credit/Debit Cards</span>
+                <span>📱 UPI</span>
+                <span>🏦 Net Banking</span>
+                <span>💰 Wallets</span>
+              </>
+            ) : (
+              <>
+                <span>💳 Visa</span>
+                <span>💳 Mastercard</span>
+                <span>💳 American Express</span>
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
