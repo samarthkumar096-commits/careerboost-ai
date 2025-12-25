@@ -1,46 +1,40 @@
-// DeepSeek AI Integration for CareerBoost AI
-// DeepSeek is faster, cheaper, and more powerful than Gemini!
+// Google Gemini AI Integration for CareerBoost AI
+// Using Gemini 2.0 Flash - Fast, Free, and Powerful!
 
-const DEEPSEEK_API_KEY = import.meta.env.VITE_DEEPSEEK_API_KEY || 'sk-your-api-key-here'
-const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions'
+const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || 'your-gemini-api-key-here'
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent'
 
-// Generate content using DeepSeek
-export const generateWithDeepSeek = async (prompt, systemPrompt = 'You are a professional resume writer and career advisor.') => {
+// Generate content using Gemini
+export const generateWithGemini = async (prompt, systemPrompt = 'You are a professional resume writer and career advisor.') => {
   try {
-    const response = await fetch(DEEPSEEK_API_URL, {
+    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'deepseek-chat',
-        messages: [
-          {
-            role: 'system',
-            content: systemPrompt
-          },
-          {
-            role: 'user',
-            content: prompt
-          }
-        ],
-        temperature: 0.7,
-        max_tokens: 4000,
-        stream: false
+        contents: [{
+          parts: [{
+            text: `${systemPrompt}\n\n${prompt}`
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 4000,
+        }
       })
     })
 
     if (!response.ok) {
       const errorData = await response.json()
-      throw new Error(`DeepSeek API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`)
+      throw new Error(`Gemini API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`)
     }
 
     const data = await response.json()
-    const text = data.choices[0].message.content
+    const text = data.candidates[0].content.parts[0].text
     return { success: true, text }
   } catch (error) {
-    console.error('DeepSeek API error:', error)
+    console.error('Gemini API error:', error)
     return { success: false, error: error.message }
   }
 }
@@ -89,7 +83,7 @@ INSTRUCTIONS:
 Return ONLY the resume content in clean, well-formatted text. No additional commentary.
 `
 
-  return await generateWithDeepSeek(prompt, systemPrompt)
+  return await generateWithGemini(prompt, systemPrompt)
 }
 
 // Check ATS Score
@@ -105,268 +99,211 @@ ${resumeText}
 JOB DESCRIPTION:
 ${jobDescription}
 
-Analyze thoroughly and provide:
-1. Overall ATS Score (0-100) - Be realistic and critical
-2. Keyword Match Score (0-100) - How well keywords match
-3. Format Score (0-100) - ATS-friendly formatting
-4. Content Quality Score (0-100) - Professional quality
+ANALYSIS REQUIRED:
+1. Overall ATS Score (0-100)
+2. Keyword Match Analysis
+3. Format Compatibility
+4. Content Quality
+5. Missing Keywords
+6. Improvement Suggestions
 
-5. Strengths (3-5 specific points)
-6. Weaknesses (3-5 specific points)
-7. Missing Keywords (list 5-10 important keywords from job description)
-8. Improvement Suggestions (5-7 actionable, specific tips)
-
-IMPORTANT: Return ONLY a valid JSON object, no markdown, no code blocks, no additional text.
-
-Format:
+Provide a detailed analysis in the following JSON format:
 {
-  "overallScore": 85,
-  "keywordScore": 80,
+  "score": 85,
+  "keywordMatch": {
+    "matched": ["keyword1", "keyword2"],
+    "missing": ["keyword3", "keyword4"],
+    "matchPercentage": 75
+  },
   "formatScore": 90,
-  "contentScore": 85,
-  "strengths": ["Specific strength 1", "Specific strength 2", "Specific strength 3"],
-  "weaknesses": ["Specific weakness 1", "Specific weakness 2", "Specific weakness 3"],
-  "missingKeywords": ["keyword1", "keyword2", "keyword3", "keyword4", "keyword5"],
-  "suggestions": ["Specific tip 1", "Specific tip 2", "Specific tip 3", "Specific tip 4", "Specific tip 5"]
+  "contentScore": 80,
+  "suggestions": [
+    "Add more quantifiable achievements",
+    "Include missing keywords: keyword3, keyword4",
+    "Improve professional summary"
+  ],
+  "strengths": [
+    "Clear formatting",
+    "Good use of action verbs"
+  ],
+  "weaknesses": [
+    "Missing key technical skills",
+    "Lacks metrics in experience section"
+  ]
 }
+
+Return ONLY the JSON object, no additional text.
 `
 
-  const result = await generateWithDeepSeek(prompt, systemPrompt)
-  
-  if (result.success) {
-    try {
-      // Clean the response - remove markdown code blocks if present
-      let cleanText = result.text.trim()
-      cleanText = cleanText.replace(/```json\n?/g, '')
-      cleanText = cleanText.replace(/```\n?/g, '')
-      cleanText = cleanText.trim()
-      
-      // Extract JSON from response
-      const jsonMatch = cleanText.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        const data = JSON.parse(jsonMatch[0])
-        return { success: true, data }
-      } else {
-        throw new Error('No valid JSON found in response')
-      }
-    } catch (error) {
-      console.error('Error parsing ATS score:', error)
-      console.log('Raw response:', result.text)
-      return { success: false, error: 'Failed to parse ATS score. Please try again.' }
-    }
-  }
-  
-  return result
+  return await generateWithGemini(prompt, systemPrompt)
 }
 
-// Generate Cover Letter
-export const generateCoverLetter = async (userData, jobDetails) => {
-  const systemPrompt = 'You are a professional cover letter writer who creates compelling, personalized cover letters that get interviews.'
+// Improve resume section
+export const improveResumeSection = async (section, sectionName, targetRole) => {
+  const systemPrompt = 'You are a professional resume writer specializing in creating impactful, ATS-optimized content.'
   
   const prompt = `
-Create a compelling, personalized cover letter for the following:
+Improve the following ${sectionName} section for a ${targetRole} role:
 
-CANDIDATE INFORMATION:
-Name: ${userData.fullName}
-Email: ${userData.email}
-Phone: ${userData.phone || ''}
-Current Role: ${userData.currentRole || ''}
-Experience Summary: ${userData.experience || ''}
-Key Skills: ${userData.skills || ''}
+CURRENT CONTENT:
+${section}
 
-JOB DETAILS:
-Company: ${jobDetails.company}
-Position: ${jobDetails.position}
-Job Description: ${jobDetails.description}
+REQUIREMENTS:
+1. Make it more impactful and professional
+2. Use strong action verbs
+3. Add quantifiable achievements where possible
+4. Optimize for ATS with relevant keywords
+5. Keep it concise and focused
+6. Ensure it's tailored for ${targetRole} role
 
-Additional Context:
-${userData.additionalInfo || ''}
-
-INSTRUCTIONS:
-1. Create a professional, engaging cover letter (3-4 paragraphs)
-2. Address the hiring manager (use "Dear Hiring Manager" if name not provided)
-3. Opening: Show enthusiasm and mention the specific role
-4. Body: Highlight 2-3 relevant achievements/experiences that match job requirements
-5. Closing: Express interest in interview and thank them
-6. Professional tone but personable and authentic
-7. Include specific examples and metrics where possible
-8. Show you researched the company
-
-Format properly with:
-[Your Name]
-[Your Email]
-[Your Phone]
-[Date]
-
-Dear Hiring Manager,
-
-[Cover letter content]
-
-Sincerely,
-[Your Name]
+Return ONLY the improved content, no additional commentary.
 `
 
-  return await generateWithDeepSeek(prompt, systemPrompt)
+  return await generateWithGemini(prompt, systemPrompt)
 }
 
-// Optimize existing resume
-export const optimizeResume = async (resumeText, targetRole) => {
-  const systemPrompt = 'You are a resume optimization expert who improves resumes to get more interviews.'
+// Generate professional summary
+export const generateProfessionalSummary = async (userData) => {
+  const systemPrompt = 'You are an expert at writing compelling professional summaries that capture attention and highlight key strengths.'
   
   const prompt = `
-Optimize and improve the following resume for the target role: ${targetRole}
+Create a powerful 3-4 line professional summary for:
+
+Role: ${userData.jobTitle}
+Experience Level: ${userData.experienceLevel || 'Mid-level'}
+Key Skills: ${userData.skills || 'Not provided'}
+Career Goals: ${userData.careerGoals || 'Seeking challenging opportunities'}
+
+REQUIREMENTS:
+1. Start with a strong opening that defines the professional
+2. Highlight 2-3 key strengths or achievements
+3. Include relevant keywords for the role
+4. End with career aspirations or value proposition
+5. Keep it concise (3-4 lines maximum)
+6. Make it ATS-friendly
+
+Return ONLY the professional summary, no additional text.
+`
+
+  return await generateWithGemini(prompt, systemPrompt)
+}
+
+// Generate work experience bullet points
+export const generateExperienceBullets = async (jobTitle, company, responsibilities) => {
+  const systemPrompt = 'You are an expert at writing achievement-focused resume bullet points that showcase impact and results.'
+  
+  const prompt = `
+Create 4-6 powerful bullet points for this work experience:
+
+Job Title: ${jobTitle}
+Company: ${company}
+Responsibilities: ${responsibilities}
+
+REQUIREMENTS:
+1. Start each bullet with a strong action verb
+2. Include quantifiable achievements (numbers, percentages, metrics)
+3. Show impact and results, not just duties
+4. Use the STAR method (Situation, Task, Action, Result)
+5. Keep each bullet to 1-2 lines
+6. Make them ATS-friendly with relevant keywords
+
+Return ONLY the bullet points (one per line, starting with •), no additional text.
+`
+
+  return await generateWithGemini(prompt, systemPrompt)
+}
+
+// Optimize resume for specific job
+export const optimizeForJob = async (resumeText, jobDescription) => {
+  const systemPrompt = 'You are an expert at tailoring resumes to specific job descriptions for maximum ATS compatibility and recruiter appeal.'
+  
+  const prompt = `
+Optimize this resume for the following job description:
 
 CURRENT RESUME:
 ${resumeText}
 
-INSTRUCTIONS:
-1. Improve formatting and structure for ATS compatibility
-2. Add relevant keywords for ${targetRole} naturally
-3. Strengthen bullet points with powerful action verbs
-4. Quantify achievements with metrics where possible
-5. Remove irrelevant or weak information
-6. Improve professional summary to be more impactful
-7. Optimize skills section with in-demand skills
-8. Ensure consistent formatting throughout
-9. Make it more concise and impactful
-10. Keep the best parts, enhance weak areas
+JOB DESCRIPTION:
+${jobDescription}
 
-Return the complete optimized resume in clean, well-formatted text.
+REQUIREMENTS:
+1. Incorporate relevant keywords from job description
+2. Highlight matching skills and experiences
+3. Adjust professional summary to align with role
+4. Reorder or emphasize relevant achievements
+5. Maintain ATS-friendly formatting
+6. Keep the core content authentic
+7. Ensure all changes are truthful and accurate
+
+Return ONLY the optimized resume, no additional commentary.
 `
 
-  return await generateWithDeepSeek(prompt, systemPrompt)
+  return await generateWithGemini(prompt, systemPrompt)
 }
 
-// Generate interview questions
-export const generateInterviewQuestions = async (jobTitle, company, jobDescription) => {
-  const systemPrompt = 'You are an experienced interviewer and career coach who helps candidates prepare for interviews.'
+// Generate cover letter
+export const generateCoverLetter = async (userData, jobDescription, companyName) => {
+  const systemPrompt = 'You are an expert at writing compelling cover letters that get interviews.'
   
   const prompt = `
-Generate 15 realistic interview questions for:
+Create a professional cover letter for:
 
-Job Title: ${jobTitle}
-Company: ${company || 'Not specified'}
-Job Description: ${jobDescription || 'Not provided'}
+CANDIDATE INFO:
+Name: ${userData.fullName}
+Target Role: ${userData.jobTitle}
+Key Skills: ${userData.skills || 'Not provided'}
+Experience: ${userData.experience || 'Not provided'}
 
-Provide:
-1. 5 General/Behavioral questions (STAR method applicable)
-2. 5 Technical/Role-specific questions (relevant to the role)
-3. 5 Company/Culture fit questions
-
-IMPORTANT: Return ONLY a valid JSON object, no markdown, no code blocks.
-
-Format:
-{
-  "general": ["Question 1?", "Question 2?", "Question 3?", "Question 4?", "Question 5?"],
-  "technical": ["Question 1?", "Question 2?", "Question 3?", "Question 4?", "Question 5?"],
-  "cultural": ["Question 1?", "Question 2?", "Question 3?", "Question 4?", "Question 5?"]
-}
-`
-
-  const result = await generateWithDeepSeek(prompt, systemPrompt)
-  
-  if (result.success) {
-    try {
-      let cleanText = result.text.trim()
-      cleanText = cleanText.replace(/```json\n?/g, '')
-      cleanText = cleanText.replace(/```\n?/g, '')
-      cleanText = cleanText.trim()
-      
-      const jsonMatch = cleanText.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        const data = JSON.parse(jsonMatch[0])
-        return { success: true, data }
-      }
-    } catch (error) {
-      console.error('Error parsing questions:', error)
-    }
-  }
-  
-  return result
-}
-
-// Analyze job description
-export const analyzeJobDescription = async (jobDescription) => {
-  const systemPrompt = 'You are a job market analyst and career advisor who helps candidates understand job requirements.'
-  
-  const prompt = `
-Analyze this job description and extract key information:
+COMPANY: ${companyName}
 
 JOB DESCRIPTION:
 ${jobDescription}
 
-Provide detailed analysis:
-1. Required Skills (must-have technical and soft skills)
-2. Preferred Skills (nice-to-have skills)
-3. Key Responsibilities (main duties)
-4. Required Experience Level (Entry/Junior/Mid/Senior/Lead)
-5. Education Requirements
-6. Important Keywords for ATS (10-15 keywords)
-7. Company Culture Indicators (what the job posting reveals)
-8. Red Flags (if any concerning aspects)
+REQUIREMENTS:
+1. Professional business letter format
+2. Strong opening that captures attention
+3. 2-3 paragraphs highlighting relevant skills and achievements
+4. Show enthusiasm for the role and company
+5. Include specific examples of relevant experience
+6. Strong closing with call to action
+7. Keep it to one page (300-400 words)
 
-IMPORTANT: Return ONLY a valid JSON object, no markdown, no code blocks.
-
-Format:
-{
-  "requiredSkills": ["skill1", "skill2", "skill3"],
-  "preferredSkills": ["skill1", "skill2", "skill3"],
-  "responsibilities": ["responsibility1", "responsibility2", "responsibility3"],
-  "experienceLevel": "Mid-level",
-  "education": "Bachelor's degree required",
-  "keywords": ["keyword1", "keyword2", "keyword3"],
-  "culture": ["indicator1", "indicator2", "indicator3"],
-  "redFlags": ["flag1", "flag2"]
-}
+Return ONLY the cover letter content, no additional commentary.
 `
 
-  const result = await generateWithDeepSeek(prompt, systemPrompt)
-  
-  if (result.success) {
-    try {
-      let cleanText = result.text.trim()
-      cleanText = cleanText.replace(/```json\n?/g, '')
-      cleanText = cleanText.replace(/```\n?/g, '')
-      cleanText = cleanText.trim()
-      
-      const jsonMatch = cleanText.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        const data = JSON.parse(jsonMatch[0])
-        return { success: true, data }
-      }
-    } catch (error) {
-      console.error('Error parsing job analysis:', error)
-    }
-  }
-  
-  return result
+  return await generateWithGemini(prompt, systemPrompt)
 }
 
-// Get resume improvement tips
-export const getResumeTips = async (resumeText) => {
-  const systemPrompt = 'You are a resume expert who provides actionable improvement advice.'
+// Suggest skills based on job title
+export const suggestSkills = async (jobTitle, experienceLevel = 'Mid-level') => {
+  const systemPrompt = 'You are a career advisor with deep knowledge of job market trends and required skills across industries.'
   
   const prompt = `
-Review this resume and provide 10 specific, actionable improvement tips:
+Suggest 15-20 relevant skills for a ${experienceLevel} ${jobTitle} role.
 
-RESUME:
-${resumeText}
+REQUIREMENTS:
+1. Include both technical and soft skills
+2. Prioritize in-demand skills for this role
+3. Mix of hard skills and soft skills
+4. Industry-standard tools and technologies
+5. Skills that are ATS-friendly
 
-Provide tips on:
-- Formatting and structure
-- Content and wording
-- Keywords and ATS optimization
-- Achievements and impact statements
-- Skills presentation
-- Overall effectiveness
-- Specific sections that need work
-
-Return as a numbered list (1-10) with specific, actionable advice.
-Each tip should be clear and implementable.
+Return as a simple comma-separated list, no additional text.
+Example: JavaScript, React, Node.js, Problem Solving, Team Leadership
 `
 
-  return await generateWithDeepSeek(prompt, systemPrompt)
+  return await generateWithGemini(prompt, systemPrompt)
 }
 
-// Export for backward compatibility
-export const generateWithGemini = generateWithDeepSeek
+// Export all functions
+export default {
+  generateWithGemini,
+  generateResume,
+  checkATSScore,
+  improveResumeSection,
+  generateProfessionalSummary,
+  generateExperienceBullets,
+  optimizeForJob,
+  generateCoverLetter,
+  suggestSkills
+}
