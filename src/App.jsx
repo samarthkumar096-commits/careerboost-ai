@@ -7,6 +7,7 @@ import Signup from './pages/Signup'
 import Pricing from './pages/Pricing'
 import ResumeBuilder from './pages/ResumeBuilder'
 import ATSChecker from './pages/ATSChecker'
+import AuthCallback from './pages/AuthCallback'
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/resume-builder" element={<ResumeBuilder />} />
           <Route path="/ats-checker" element={<ATSChecker />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
         </Routes>
         
         {/* Bhindi AI Chat Widget - Available on all pages */}
