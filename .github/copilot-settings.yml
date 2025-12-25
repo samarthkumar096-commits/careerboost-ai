@@ -1,0 +1,44 @@
+# GitHub Copilot Configuration
+
+# Enable Copilot suggestions
+github.copilot.enable:
+  "*": true
+  plaintext: false
+  markdown: true
+  scminput: false
+
+# Copilot settings
+github.copilot.advanced:
+  # Suggestion delay (ms)
+  inlineSuggest.delay: 0
+  
+  # Enable for all languages
+  enableAutoCompletions: true
+  
+  # Show suggestions on trigger
+  showSuggestionsOnTrigger: true
+
+# Language-specific settings
+[javascript]
+  github.copilot.enable: true
+  
+[typescript]
+  github.copilot.enable: true
+  
+[python]
+  github.copilot.enable: true
+  
+[jsx]
+  github.copilot.enable: true
+  
+[tsx]
+  github.copilot.enable: true
+
+# Exclude patterns (files where Copilot won't suggest)
+github.copilot.excludePatterns:
+  - "**/node_modules/**"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/.env*"
+  - "**/package-lock.json"
+  - "**/yarn.lock"
