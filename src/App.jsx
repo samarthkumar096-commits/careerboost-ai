@@ -8,8 +8,26 @@ import Pricing from './pages/Pricing'
 import ResumeBuilder from './pages/ResumeBuilder'
 import ATSChecker from './pages/ATSChecker'
 import AuthCallback from './pages/AuthCallback'
+import { useEffect } from 'react'
+
+// Import Auto-Fix Bot
+import autoFixBot from './lib/autoFixBot'
 
 function App() {
+  // Run Auto-Fix Bot on app load (only in development)
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      console.log('🤖 Running Auto-Fix Bot...');
+      autoFixBot.detectAllIssues().then(result => {
+        if (result.status === 'healthy') {
+          console.log('✅ All systems operational!');
+        } else {
+          console.log('⚠️  Issues detected. Check console for details.');
+        }
+      });
+    }
+  }, []);
+
   return (
     <AuthProvider>
       <Router>
