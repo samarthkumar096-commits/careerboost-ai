@@ -1,5 +1,8 @@
 // Razorpay Integration for CareerBoost AI
 
+// API Base URL
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+
 // Load Razorpay script
 export const loadRazorpay = () => {
   return new Promise((resolve) => {
@@ -86,7 +89,7 @@ export const getPlanWithCurrency = (planId, currency = 'INR') => {
   }
 }
 
-// Create Razorpay order
+// Create Razorpay order via backend
 export const createRazorpayOrder = async (planId, userEmail, userName, currency = 'INR') => {
   const plan = getPlanWithCurrency(planId, currency)
   
@@ -94,14 +97,56 @@ export const createRazorpayOrder = async (planId, userEmail, userName, currency 
     throw new Error('Invalid plan selected')
   }
 
-  // In production, call your backend API to create order
-  // For now, returning mock order
-  return {
-    orderId: `order_${Date.now()}`,
-    amount: plan.price * 100, // Convert to smallest unit (paise/cents)
-    currency: plan.currency,
-    planId: plan.id,
-    planName: plan.name
+  try {
+    const response = await fetch(`${API_URL}/api/create-order`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        amount: plan.price * 100, // Convert to smallest unit (paise/cents)
+        currency: plan.currency,
+        planId: plan.id,
+        planName: plan.name,
+        userEmail,
+        userName,
+      }),
+    })
+
+    const data = await response.json()
+
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to create order')
+    }
+
+    return data
+  } catch (error) {
+    console.error('Order creation error:', error)
+    throw error
+  }
+}
+
+// Verify payment via backend
+export const verifyRazorpayPayment = async (paymentData) => {
+  try {
+    const response = await fetch(`${API_URL}/api/verify-payment`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(paymentData),
+    })
+
+    const data = await response.json()
+
+    if (!data.success) {
+      throw new Error(data.error || 'Payment verification failed')
+    }
+
+    return data
+  } catch (error) {
+    console.error('Payment verification error:', error)
+    throw error
   }
 }
 
@@ -111,23 +156,25 @@ export const initiateRazorpayPayment = async (planId, userEmail, userName, curre
   const loaded = await loadRazorpay()
   
   if (!loaded) {
-    alert('Razorpay SDK failed to load. Please check your internet connection.')
-    return { success: false, error: 'SDK load failed' }
+    return { 
+      success: false, 
+      error: 'Razorpay SDK failed to load. Please check your internet connection.' 
+    }
   }
 
   try {
-    // Create order
+    // Create order via backend
     const order = await createRazorpayOrder(planId, userEmail, userName, currency)
     const plan = getPlanWithCurrency(planId, currency)
 
     // Razorpay options
     const options = {
-      key: RAZORPAY_KEY,
+      key: order.key || RAZORPAY_KEY,
       amount: order.amount,
       currency: order.currency,
       name: 'CareerBoost AI',
       description: plan.description,
-      image: 'https://your-logo-url.com/logo.png',
+      image: 'https://careerboost-ai.vercel.app/logo.png',
       order_id: order.orderId,
       prefill: {
         name: userName || '',
@@ -136,17 +183,31 @@ export const initiateRazorpayPayment = async (planId, userEmail, userName, curre
       theme: {
         color: '#9333ea'
       },
-      handler: function (response) {
-        return {
-          success: true,
-          paymentId: response.razorpay_payment_id,
-          orderId: response.razorpay_order_id,
-          signature: response.razorpay_signature
+      handler: async function (response) {
+        // Verify payment on backend
+        try {
+          const verificationResult = await verifyRazorpayPayment({
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+            planId: planId,
+            userEmail: userEmail,
+          })
+
+          return {
+            success: true,
+            ...verificationResult,
+          }
+        } catch (error) {
+          return {
+            success: false,
+            error: error.message,
+          }
         }
       },
       modal: {
         ondismiss: function() {
-          return { success: false, error: 'Payment cancelled' }
+          return { success: false, error: 'Payment cancelled by user' }
         }
       }
     }
@@ -155,21 +216,34 @@ export const initiateRazorpayPayment = async (planId, userEmail, userName, curre
     const razorpay = new window.Razorpay(options)
     
     return new Promise((resolve) => {
-      razorpay.on('payment.success', function (response) {
-        resolve({
-          success: true,
-          paymentId: response.razorpay_payment_id,
-          orderId: response.razorpay_order_id,
-          signature: response.razorpay_signature,
-          planId: planId,
-          currency: currency
-        })
+      razorpay.on('payment.success', async function (response) {
+        try {
+          const verificationResult = await verifyRazorpayPayment({
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+            planId: planId,
+            userEmail: userEmail,
+          })
+
+          resolve({
+            success: true,
+            ...verificationResult,
+            planId: planId,
+            currency: currency,
+          })
+        } catch (error) {
+          resolve({
+            success: false,
+            error: error.message,
+          })
+        }
       })
 
       razorpay.on('payment.error', function (response) {
         resolve({
           success: false,
-          error: response.error.description
+          error: response.error.description || 'Payment failed',
         })
       })
 
@@ -179,15 +253,5 @@ export const initiateRazorpayPayment = async (planId, userEmail, userName, curre
   } catch (error) {
     console.error('Payment error:', error)
     return { success: false, error: error.message }
-  }
-}
-
-// Verify payment (call your backend)
-export const verifyRazorpayPayment = async (paymentId, orderId, signature) => {
-  // In production, verify signature on backend
-  return {
-    verified: true,
-    paymentId,
-    orderId
   }
 }
