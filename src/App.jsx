@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './contexts/AuthContext'
+import BhindiChat from './components/BhindiChat'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
@@ -19,6 +20,9 @@ function App() {
           <Route path="/resume-builder" element={<ResumeBuilder />} />
           <Route path="/ats-checker" element={<ATSChecker />} />
         </Routes>
+        
+        {/* Bhindi AI Chat Widget - Available on all pages */}
+        <BhindiChat />
       </Router>
     </AuthProvider>
   )
