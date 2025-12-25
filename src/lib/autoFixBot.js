@@ -1,5 +1,5 @@
-// 🤖 CareerBoost AI - Auto-Fix Bot
-// Automatically detects and fixes common issues
+// 🤖 CareerBoost AI - Auto-Fix Bot v2.0
+// Automatically detects, fixes, and REMOVES broken features
 
 import { supabase } from './supabase';
 
@@ -7,16 +7,21 @@ class AutoFixBot {
   constructor() {
     this.issues = [];
     this.fixes = [];
+    this.removed = [];
     this.autoFixEnabled = true;
+    this.autoRemoveEnabled = true; // NEW: Auto-remove broken features
   }
 
   // ============================================
   // 1. AUTO-DETECT ALL ISSUES
   // ============================================
   async detectAllIssues() {
-    console.log('🤖 Auto-Fix Bot Starting...\n');
+    console.log('🤖 Auto-Fix Bot v2.0 Starting...\n');
+    console.log('🗑️  Auto-Remove Mode: ENABLED\n');
     
     this.issues = [];
+    this.fixes = [];
+    this.removed = [];
     
     // Check environment variables
     await this.checkEnvironmentVariables();
@@ -30,6 +35,9 @@ class AutoFixBot {
     // Check authentication
     await this.checkAuthentication();
     
+    // Check payment gateways
+    await this.checkPaymentGateways();
+    
     // Generate report
     this.generateReport();
     
@@ -38,10 +46,16 @@ class AutoFixBot {
       await this.autoFixIssues();
     }
     
+    // Auto-remove broken features
+    if (this.autoRemoveEnabled && this.issues.length > 0) {
+      await this.autoRemoveBrokenFeatures();
+    }
+    
     return {
       issues: this.issues,
       fixes: this.fixes,
-      status: this.issues.length === 0 ? 'healthy' : 'needs-attention'
+      removed: this.removed,
+      status: this.issues.filter(i => i.severity === 'critical').length === 0 ? 'operational' : 'degraded'
     };
   }
 
@@ -55,33 +69,39 @@ class AutoFixBot {
       'VITE_SUPABASE_URL': {
         value: import.meta.env.VITE_SUPABASE_URL,
         fallback: 'https://kjovhrtgunlxfflklsap.supabase.co',
-        critical: true
+        critical: true,
+        feature: 'Authentication & Database'
       },
       'VITE_SUPABASE_ANON_KEY': {
         value: import.meta.env.VITE_SUPABASE_ANON_KEY,
         fallback: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imtqb3ZocnRndW5seGZmbGtsc2FwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2NjM1NTQsImV4cCI6MjA4MTIzOTU1NH0.ckUthyXsZFYCJnXgTGnjay6UJnxaPb9xFkwDnc5MrJk',
-        critical: true
+        critical: true,
+        feature: 'Authentication & Database'
       },
       'VITE_GEMINI_API_KEY': {
         value: import.meta.env.VITE_GEMINI_API_KEY,
         fallback: null,
         critical: true,
+        feature: 'AI Resume Builder & ATS Checker',
         getInstructions: 'Get from https://aistudio.google.com/apikey'
       },
       'VITE_BHINDI_API_KEY': {
         value: import.meta.env.VITE_BHINDI_API_KEY,
         fallback: 'bhindi_dev_sk_careerboost_ai_2024_temp_access_v1',
-        critical: false
+        critical: false,
+        feature: 'Bhindi Chat Widget'
       },
       'VITE_RAZORPAY_KEY_ID': {
         value: import.meta.env.VITE_RAZORPAY_KEY_ID,
         fallback: 'rzp_test_RvMV8TCAdy3ugd',
-        critical: false
+        critical: false,
+        feature: 'Razorpay Payments'
       },
       'VITE_STRIPE_PUBLIC_KEY': {
         value: import.meta.env.VITE_STRIPE_PUBLIC_KEY,
         fallback: 'pk_test_51QHoXoSFzSkQ6u8thKZrbhD2Dg2Ae1xPQuJcV6GPmm5xrIKDdhoixq0uydtbObumUIKKWXVJpveHPEZXuPCMfLmO00DZzL7jh8',
-        critical: false
+        critical: false,
+        feature: 'Stripe Payments'
       }
     };
 
@@ -94,13 +114,15 @@ class AutoFixBot {
           type: 'env-var',
           severity: config.critical ? 'critical' : 'warning',
           key: key,
+          feature: config.feature,
           message: `${key} is missing or invalid`,
           fix: config.fallback ? 'auto-fixable' : 'manual',
           fallback: config.fallback,
-          instructions: config.getInstructions
+          instructions: config.getInstructions,
+          canRemove: !config.critical // Can remove non-critical features
         });
         
-        console.log(`❌ ${key}: MISSING`);
+        console.log(`❌ ${key}: MISSING - Affects: ${config.feature}`);
       } else {
         console.log(`✅ ${key}: OK`);
       }
@@ -120,8 +142,10 @@ class AutoFixBot {
         this.issues.push({
           type: 'supabase',
           severity: 'critical',
+          feature: 'Authentication & Database',
           message: `Supabase connection error: ${error.message}`,
-          fix: 'check-credentials'
+          fix: 'check-credentials',
+          canRemove: false
         });
         console.log('❌ Supabase: ERROR -', error.message);
       } else {
@@ -131,8 +155,10 @@ class AutoFixBot {
       this.issues.push({
         type: 'supabase',
         severity: 'critical',
+        feature: 'Authentication & Database',
         message: `Supabase connection failed: ${err.message}`,
-        fix: 'check-credentials'
+        fix: 'check-credentials',
+        canRemove: false
       });
       console.log('❌ Supabase: FAILED -', err.message);
     }
@@ -167,23 +193,36 @@ class AutoFixBot {
             type: 'api',
             severity: 'critical',
             service: 'Gemini',
+            feature: 'AI Resume Builder & ATS Checker',
             message: `Gemini API error: ${error.error?.message || 'Unknown'}`,
-            fix: 'check-api-key'
+            fix: 'check-api-key',
+            canRemove: true // Can disable AI features
           });
-          console.log('❌ Gemini API: ERROR');
+          console.log('❌ Gemini API: ERROR - Will disable AI features');
         }
       } catch (err) {
         this.issues.push({
           type: 'api',
           severity: 'critical',
           service: 'Gemini',
+          feature: 'AI Resume Builder & ATS Checker',
           message: `Gemini API failed: ${err.message}`,
-          fix: 'check-network'
+          fix: 'check-network',
+          canRemove: true
         });
-        console.log('❌ Gemini API: FAILED');
+        console.log('❌ Gemini API: FAILED - Will disable AI features');
       }
     } else {
-      console.log('⚠️  Gemini API: Not configured');
+      this.issues.push({
+        type: 'api',
+        severity: 'critical',
+        service: 'Gemini',
+        feature: 'AI Resume Builder & ATS Checker',
+        message: 'Gemini API key not configured',
+        fix: 'add-api-key',
+        canRemove: true
+      });
+      console.log('⚠️  Gemini API: Not configured - Will disable AI features');
     }
   }
 
@@ -194,7 +233,6 @@ class AutoFixBot {
     console.log('\n📋 Checking Authentication Setup...');
     
     try {
-      // Check if user is logged in
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
@@ -206,15 +244,57 @@ class AutoFixBot {
       this.issues.push({
         type: 'auth',
         severity: 'warning',
+        feature: 'Authentication',
         message: `Authentication check failed: ${err.message}`,
-        fix: 'check-supabase-setup'
+        fix: 'check-supabase-setup',
+        canRemove: false
       });
       console.log('⚠️  Auth check failed');
     }
   }
 
   // ============================================
-  // 6. AUTO-FIX ISSUES
+  // 6. CHECK PAYMENT GATEWAYS
+  // ============================================
+  async checkPaymentGateways() {
+    console.log('\n📋 Checking Payment Gateways...');
+    
+    const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+    const stripeKey = import.meta.env.VITE_STRIPE_PUBLIC_KEY;
+    
+    if (!razorpayKey || razorpayKey.includes('your-')) {
+      this.issues.push({
+        type: 'payment',
+        severity: 'warning',
+        service: 'Razorpay',
+        feature: 'Razorpay Payments',
+        message: 'Razorpay not configured',
+        fix: 'add-api-key',
+        canRemove: true
+      });
+      console.log('⚠️  Razorpay: Not configured - Will disable');
+    } else {
+      console.log('✅ Razorpay: Configured');
+    }
+    
+    if (!stripeKey || stripeKey.includes('your-')) {
+      this.issues.push({
+        type: 'payment',
+        severity: 'warning',
+        service: 'Stripe',
+        feature: 'Stripe Payments',
+        message: 'Stripe not configured',
+        fix: 'add-api-key',
+        canRemove: true
+      });
+      console.log('⚠️  Stripe: Not configured - Will disable');
+    } else {
+      console.log('✅ Stripe: Configured');
+    }
+  }
+
+  // ============================================
+  // 7. AUTO-FIX ISSUES
   // ============================================
   async autoFixIssues() {
     console.log('\n🔧 Auto-Fixing Issues...\n');
@@ -227,6 +307,7 @@ class AutoFixBot {
           
           this.fixes.push({
             issue: issue.key,
+            feature: issue.feature,
             action: 'Applied fallback value',
             status: 'success',
             note: 'Temporary fix - Add to Vercel for permanent solution'
@@ -241,11 +322,58 @@ class AutoFixBot {
   }
 
   // ============================================
-  // 7. GENERATE REPORT
+  // 8. AUTO-REMOVE BROKEN FEATURES (NEW!)
+  // ============================================
+  async autoRemoveBrokenFeatures() {
+    console.log('\n🗑️  Auto-Removing Broken Features...\n');
+    
+    const removableIssues = this.issues.filter(i => i.canRemove);
+    
+    for (const issue of removableIssues) {
+      try {
+        // Mark feature as disabled
+        localStorage.setItem(`feature_disabled_${issue.feature}`, 'true');
+        
+        this.removed.push({
+          feature: issue.feature,
+          reason: issue.message,
+          status: 'disabled',
+          note: 'Feature will be hidden until fixed'
+        });
+        
+        console.log(`🗑️  Removed: ${issue.feature}`);
+        console.log(`   Reason: ${issue.message}`);
+      } catch (err) {
+        console.log(`❌ Failed to remove: ${issue.feature}`);
+      }
+    }
+    
+    if (removableIssues.length === 0) {
+      console.log('ℹ️  No features need to be removed');
+    }
+  }
+
+  // ============================================
+  // 9. CHECK IF FEATURE IS ENABLED
+  // ============================================
+  isFeatureEnabled(featureName) {
+    return localStorage.getItem(`feature_disabled_${featureName}`) !== 'true';
+  }
+
+  // ============================================
+  // 10. RE-ENABLE FEATURE
+  // ============================================
+  enableFeature(featureName) {
+    localStorage.removeItem(`feature_disabled_${featureName}`);
+    console.log(`✅ Re-enabled: ${featureName}`);
+  }
+
+  // ============================================
+  // 11. GENERATE REPORT
   // ============================================
   generateReport() {
     console.log('\n' + '='.repeat(60));
-    console.log('📊 AUTO-FIX BOT REPORT');
+    console.log('📊 AUTO-FIX BOT v2.0 REPORT');
     console.log('='.repeat(60));
     
     const critical = this.issues.filter(i => i.severity === 'critical');
@@ -254,6 +382,7 @@ class AutoFixBot {
     console.log(`\n🔴 Critical Issues: ${critical.length}`);
     critical.forEach(issue => {
       console.log(`   - ${issue.message}`);
+      console.log(`     Affects: ${issue.feature}`);
       if (issue.instructions) {
         console.log(`     → ${issue.instructions}`);
       }
@@ -262,6 +391,7 @@ class AutoFixBot {
     console.log(`\n⚠️  Warnings: ${warnings.length}`);
     warnings.forEach(issue => {
       console.log(`   - ${issue.message}`);
+      console.log(`     Affects: ${issue.feature}`);
     });
     
     if (this.fixes.length > 0) {
@@ -274,6 +404,15 @@ class AutoFixBot {
       });
     }
     
+    if (this.removed.length > 0) {
+      console.log(`\n🗑️  Features Disabled: ${this.removed.length}`);
+      this.removed.forEach(item => {
+        console.log(`   - ${item.feature}`);
+        console.log(`     Reason: ${item.reason}`);
+        console.log(`     ${item.note}`);
+      });
+    }
+    
     console.log('\n💡 RECOMMENDED ACTIONS:');
     
     if (critical.length > 0) {
@@ -282,7 +421,7 @@ class AutoFixBot {
       
       const missingVars = critical.filter(i => i.type === 'env-var');
       missingVars.forEach(v => {
-        console.log(`   - ${v.key}`);
+        console.log(`   - ${v.key} (for ${v.feature})`);
         if (v.instructions) {
           console.log(`     ${v.instructions}`);
         }
@@ -290,87 +429,43 @@ class AutoFixBot {
       
       console.log('\n2. Redeploy the application');
       console.log('\n3. Run this bot again to verify fixes');
+      console.log('\n4. Re-enable features: autoFixBot.enableFeature("Feature Name")');
     } else {
       console.log('✅ All critical issues resolved!');
-      console.log('✅ Application should be working correctly');
+      console.log('✅ Application is operational');
     }
     
     console.log('\n' + '='.repeat(60));
   }
 
   // ============================================
-  // 8. GET SETUP INSTRUCTIONS
+  // 12. GET DISABLED FEATURES
   // ============================================
-  getSetupInstructions() {
-    return {
-      title: '🚀 Complete Setup Guide',
-      steps: [
-        {
-          step: 1,
-          title: 'Get Gemini API Key (FREE)',
-          url: 'https://aistudio.google.com/apikey',
-          instructions: [
-            'Sign in with Google account',
-            'Click "Create API Key"',
-            'Copy the key (starts with AIza...)'
-          ]
-        },
-        {
-          step: 2,
-          title: 'Add Environment Variables to Vercel',
-          url: 'https://vercel.com/dashboard',
-          instructions: [
-            'Select careerboost-ai project',
-            'Go to Settings → Environment Variables',
-            'Add these variables:',
-            '  - VITE_GEMINI_API_KEY=AIza...',
-            '  - VITE_SUPABASE_URL=https://kjovhrtgunlxfflklsap.supabase.co',
-            '  - VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-            '  - VITE_BHINDI_API_KEY=bhindi_dev_sk_careerboost_ai_2024_temp_access_v1',
-            '  - VITE_RAZORPAY_KEY_ID=rzp_test_RvMV8TCAdy3ugd',
-            '  - VITE_STRIPE_PUBLIC_KEY=pk_test_51QHoXoSFzSkQ6u8t...',
-            'Select all 3 environments (Production, Preview, Development)',
-            'Save'
-          ]
-        },
-        {
-          step: 3,
-          title: 'Redeploy Application',
-          instructions: [
-            'Vercel will automatically redeploy',
-            'Wait 2-3 minutes',
-            'Check deployment status'
-          ]
-        },
-        {
-          step: 4,
-          title: 'Verify Setup',
-          instructions: [
-            'Run: autoFixBot.detectAllIssues()',
-            'Check for any remaining issues',
-            'Test Resume Builder',
-            'Test ATS Checker'
-          ]
-        }
-      ]
-    };
+  getDisabledFeatures() {
+    const features = [
+      'AI Resume Builder & ATS Checker',
+      'Bhindi Chat Widget',
+      'Razorpay Payments',
+      'Stripe Payments'
+    ];
+    
+    return features.filter(f => !this.isFeatureEnabled(f));
   }
 }
 
 // ============================================
-// 9. EXPORT AND AUTO-RUN
+// 13. EXPORT AND AUTO-RUN
 // ============================================
 const autoFixBot = new AutoFixBot();
 
-// Auto-run on import (can be disabled)
+// Make available globally
 if (typeof window !== 'undefined') {
-  // Run diagnostic on page load
-  window.addEventListener('load', () => {
-    console.log('🤖 Auto-Fix Bot loaded. Run autoFixBot.detectAllIssues() to start.');
-  });
-  
-  // Make available globally
   window.autoFixBot = autoFixBot;
+  
+  // Helper functions
+  window.checkFeature = (name) => autoFixBot.isFeatureEnabled(name);
+  window.enableFeature = (name) => autoFixBot.enableFeature(name);
+  window.getDisabledFeatures = () => autoFixBot.getDisabledFeatures();
 }
 
 export default autoFixBot;
