@@ -1,238 +1,306 @@
-# CareerBoost AI - Your AI Career Partner
+# 🚀 CareerBoost AI - Mobile Apps
 
-**🚧 LATEST UPDATE: Payment system temporarily disabled - All features FREE!**
+## AI-Powered Resume Builder - Flutter & React Native Apps
 
-A modern web application for creating ATS-friendly resumes, cover letters, and optimizing your career documents with AI. Includes Razorpay payment integration for Pro subscriptions.
-
-## 🎉 Current Status
-
-**All Pro features are currently FREE while we upgrade our payment infrastructure!**
-
-- ✅ Unlimited AI Resume Generation
-- ✅ ATS Score Checker  
-- ✅ Premium Templates
-- ✅ No payment required
-
-## 🚀 Quick Deploy
-
-### Deploy Frontend (One-Click)
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/samarthkumar096-commits/careerboost-ai&env=VITE_GEMINI_API_KEY,VITE_SUPABASE_URL,VITE_SUPABASE_ANON_KEY&envDescription=API%20keys%20required&project-name=careerboost-ai&repository-name=careerboost-ai)
-
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/samarthkumar096-commits/careerboost-ai)
-
-### Deploy Backend
-
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/new)
-
-**After deployment, update environment variables with your API keys!**
-
-## ✨ Features
-
-- **AI Resume Builder**: Build ATS-friendly resumes with Gemini AI assistance
-- **Cover Letter Generator**: Generate professional cover letters
-- **ATS Score Checker**: Check your resume compatibility with ATS systems
-- **AI Optimizer**: Enhance your resume with AI-powered tips
-- **Auto-Fix Bot v2.0**: Automatically detects and fixes configuration issues
-- **Smart Feature Management**: Broken features automatically hidden
-- **Pro Subscription**: Razorpay-powered payment system (coming soon)
-- **Lifetime Access**: One-time payment option
-
-## 💰 Pricing (Coming Soon)
-
-- **Free:** ₹0 - Currently all features free!
-- **Pro Monthly:** ₹299/month - Unlimited everything
-- **Pro Yearly:** ₹2,999/year - Save 17%
-- **Lifetime:** ₹4,999 - One-time payment
-
-## 🛠️ Tech Stack
-
-### Frontend
-- **React 18** + Vite
-- **Tailwind CSS** for styling
-- **React Router v6** for navigation
-- **Lucide React** for icons
-- **Razorpay.js** for payment processing
-- **Supabase** for authentication & database
-- **Google Gemini AI** for resume generation
-
-### Backend
-- **Supabase** for backend services
-- **Razorpay API** for payments
-- **Webhook handling** for subscription events
-
-## 🤖 Auto-Fix Bot v2.0
-
-Our intelligent bot automatically:
-- ✅ Detects configuration issues
-- ✅ Fixes problems automatically
-- ✅ Hides broken features
-- ✅ Shows maintenance notices
-- ✅ Provides setup instructions
-
-## 📦 Local Development
-
-### Prerequisites
-
-- Node.js 18+ and npm
-- Gemini API key (free from https://aistudio.google.com/apikey)
-- Supabase account (free tier available)
-- Razorpay account (for payments)
-
-### Environment Variables
-
-Create a `.env` file:
-
-```env
-# Required
-VITE_GEMINI_API_KEY=your_gemini_api_key
-VITE_SUPABASE_URL=your_supabase_url
-VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-
-# Optional (for payments)
-VITE_RAZORPAY_KEY_ID=your_razorpay_key
-VITE_BHINDI_API_KEY=your_bhindi_key
-```
-
-### Installation
-
-```bash
-# Clone repository
-git clone https://github.com/samarthkumar096-commits/careerboost-ai.git
-cd careerboost-ai
-
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-```
-
-Visit `http://localhost:5173`
-
-## 🔧 Troubleshooting
-
-### Auto-Fix Bot
-
-Open browser console and run:
-
-```javascript
-// Check all issues
-window.autoFixBot.detectAllIssues()
-
-// See disabled features
-window.getDisabledFeatures()
-
-// Re-enable feature after fix
-window.enableFeature("Feature Name")
-```
-
-### Common Issues
-
-1. **Payment Failed Error**: Payments temporarily disabled - all features free
-2. **AI Not Working**: Add VITE_GEMINI_API_KEY to environment variables
-3. **Auth Issues**: Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY
-
-## 📝 API Keys Setup
-
-### 1. Gemini API (FREE)
-1. Visit https://aistudio.google.com/apikey
-2. Sign in with Google
-3. Create API Key
-4. Copy and add to Vercel environment variables
-
-### 2. Supabase (FREE)
-1. Visit https://supabase.com
-2. Create new project
-3. Copy URL and anon key from Settings → API
-4. Add to Vercel environment variables
-
-### 3. Razorpay (Optional)
-1. Visit https://razorpay.com
-2. Create account
-3. Get test/live keys
-4. Add to Vercel environment variables
-
-## 🚀 Deployment
-
-### Vercel (Recommended)
-
-1. Push code to GitHub
-2. Import project in Vercel
-3. Add environment variables
-4. Deploy!
-
-### Environment Variables in Vercel
-
-Go to: Settings → Environment Variables
-
-Add:
-- `VITE_GEMINI_API_KEY`
-- `VITE_SUPABASE_URL`
-- `VITE_SUPABASE_ANON_KEY`
-- `VITE_RAZORPAY_KEY_ID` (optional)
-- `VITE_BHINDI_API_KEY` (optional)
-
-Select all environments (Production, Preview, Development)
-
-## 📱 Features Status
-
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Homepage | ✅ Working | Fully functional |
-| Authentication | ✅ Working | Supabase powered |
-| Resume Builder | ⚠️ Needs API | Add Gemini API key |
-| ATS Checker | ⚠️ Needs API | Add Gemini API key |
-| Payments | 🚧 Maintenance | Coming soon |
-| Auto-Fix Bot | ✅ Working | Runs automatically |
-
-## 🤝 Contributing
-
-Contributions welcome! Please:
-1. Fork the repository
-2. Create feature branch
-3. Commit changes
-4. Push to branch
-5. Open pull request
-
-## 📄 License
-
-MIT License - feel free to use for personal/commercial projects
-
-## 🆘 Support
-
-- **Issues**: Open GitHub issue
-- **Email**: support@careerboost-ai.com
-- **Docs**: Check console for Auto-Fix Bot reports
-
-## 🎯 Roadmap
-
-- [x] AI Resume Builder
-- [x] ATS Checker
-- [x] Auto-Fix Bot v2.0
-- [x] Smart Feature Management
-- [ ] Payment Integration (in progress)
-- [ ] Cover Letter Generator
-- [ ] LinkedIn Profile Optimizer
-- [ ] Interview Prep AI
-- [ ] Job Matching AI
-
-## ⚡ Performance
-
-- Lighthouse Score: 95+
-- First Contentful Paint: < 1s
-- Time to Interactive: < 2s
-- Bundle Size: < 500KB
-
-## 🔒 Security
-
-- All API keys encrypted
-- Secure authentication via Supabase
-- Payment processing via Razorpay
-- No sensitive data stored locally
+[![Build Flutter APK](https://github.com/samarthkumar096-commits/careerboost-ai/actions/workflows/build-flutter-apk.yml/badge.svg)](https://github.com/samarthkumar096-commits/careerboost-ai/actions/workflows/build-flutter-apk.yml)
 
 ---
 
-**Made with ❤️ by CareerBoost AI Team**
+## 📱 **MOBILE APPS:**
 
-**Last Updated**: December 25, 2025 - Payment system under maintenance, all features FREE!
+### **Flutter App** ⭐ (Recommended)
+```
+✅ Native performance
+✅ Small size (6-8 MB)
+✅ Beautiful UI
+✅ Full API integration
+✅ Material Design 3
+```
+
+### **React Native App**
+```
+✅ WebView-based
+✅ Quick setup
+✅ Cross-platform
+```
+
+---
+
+## 🎯 **FEATURES:**
+
+```
+✅ AI Resume Builder
+✅ ATS Score Checker
+✅ Cover Letter Generator
+✅ Payment Integration (Razorpay)
+✅ User Authentication
+✅ File Upload
+✅ Real-time Updates
+✅ Offline Support
+```
+
+---
+
+## 📥 **DOWNLOAD APK:**
+
+### **Method 1: GitHub Actions** (Free, Unlimited)
+```
+https://github.com/samarthkumar096-commits/careerboost-ai/actions
+→ Build Flutter APK
+→ Latest run
+→ Download artifacts
+```
+
+### **Method 2: Codemagic** (Better UI)
+```
+https://codemagic.io
+→ Sign up with GitHub
+→ Add repository
+→ Download APK
+```
+
+---
+
+## 🏗️ **BUILD LOCALLY:**
+
+### **Flutter:**
+```bash
+cd mobile-flutter
+flutter pub get
+flutter build apk --release --split-per-abi
+```
+
+### **React Native:**
+```bash
+cd mobile-native
+npm install
+npx expo prebuild
+cd android && ./gradlew assembleRelease
+```
+
+---
+
+## 🔗 **QUICK LINKS:**
+
+| Resource | Link |
+|----------|------|
+| **Live Web App** | https://careerboost-ai-two.vercel.app |
+| **GitHub Actions** | [View Builds](https://github.com/samarthkumar096-commits/careerboost-ai/actions) |
+| **Flutter Guide** | [FLUTTER_BUILD_GUIDE.md](FLUTTER_BUILD_GUIDE.md) |
+| **API Integration** | [FLUTTER_API_INTEGRATION.md](FLUTTER_API_INTEGRATION.md) |
+| **Codemagic Setup** | [CODEMAGIC_SETUP.md](CODEMAGIC_SETUP.md) |
+
+---
+
+## 📊 **PROJECT STRUCTURE:**
+
+```
+careerboost-ai/
+├── mobile-flutter/          # Flutter App (Recommended)
+│   ├── lib/
+│   │   ├── main.dart
+│   │   ├── screens/
+│   │   ├── widgets/
+│   │   ├── services/       # API Integration
+│   │   ├── models/         # Data Models
+│   │   └── providers/      # State Management
+│   └── android/
+│
+├── mobile-native/           # React Native App
+│   ├── App.js
+│   └── package.json
+│
+├── .github/workflows/       # CI/CD
+│   ├── build-flutter-apk.yml
+│   └── build-native-apk.yml
+│
+├── codemagic.yaml          # Codemagic Config
+└── Documentation/
+```
+
+---
+
+## 🚀 **CI/CD:**
+
+### **GitHub Actions:**
+```
+✅ Auto-build on push
+✅ Free unlimited builds
+✅ 3 APK variants + AAB
+✅ Download from artifacts
+```
+
+### **Codemagic:**
+```
+✅ Professional dashboard
+✅ Email notifications
+✅ Easy downloads
+✅ 500 min free/month
+```
+
+---
+
+## 🎨 **TECH STACK:**
+
+### **Flutter App:**
+```
+- Flutter 3.16.0
+- Dart
+- Material Design 3
+- Provider (State Management)
+- Dio (HTTP Client)
+- WebView Flutter
+- Secure Storage
+```
+
+### **React Native App:**
+```
+- React Native 0.73.6
+- Expo SDK 50
+- React 18.2.0
+- WebView
+```
+
+---
+
+## 📖 **DOCUMENTATION:**
+
+- [Flutter Build Guide](FLUTTER_BUILD_GUIDE.md)
+- [Flutter API Integration](FLUTTER_API_INTEGRATION.md)
+- [Codemagic Setup](CODEMAGIC_SETUP.md)
+- [Android Studio Build](ANDROID_STUDIO_BUILD.md)
+- [Complete APK Guide](COMPLETE_APK_BUILD_GUIDE.md)
+
+---
+
+## 🔧 **SETUP:**
+
+### **Prerequisites:**
+```
+- Flutter SDK 3.16.0+
+- Android Studio / VS Code
+- Java JDK 17
+- Android SDK
+```
+
+### **Install:**
+```bash
+# Clone repository
+git clone https://github.com/samarthkumar096-commits/careerboost-ai.git
+
+# Flutter app
+cd mobile-flutter
+flutter pub get
+flutter run
+
+# React Native app
+cd mobile-native
+npm install
+npm start
+```
+
+---
+
+## 🎯 **BUILD METHODS:**
+
+### **1. GitHub Actions** (Automatic)
+```
+✅ Push to main branch
+✅ Auto-build triggered
+✅ Download from Actions tab
+✅ Free unlimited
+```
+
+### **2. Codemagic** (Professional)
+```
+✅ Sign up with GitHub
+✅ Add repository
+✅ Auto-build on push
+✅ Download from dashboard
+```
+
+### **3. Local Build** (Full Control)
+```
+✅ Build on your machine
+✅ Test immediately
+✅ Debug easily
+✅ No cloud dependency
+```
+
+---
+
+## 📱 **APK VARIANTS:**
+
+```
+app-arm64-v8a-release.apk     # Modern phones (Recommended)
+app-armeabi-v7a-release.apk   # Older phones
+app-x86_64-release.apk        # Emulators
+app-release.aab               # Play Store
+```
+
+---
+
+## 🔐 **API INTEGRATION:**
+
+### **Backend:**
+```
+https://careerboost-ai-two.vercel.app
+```
+
+### **Features:**
+```
+✅ Authentication (JWT)
+✅ Resume Generation
+✅ ATS Score Checking
+✅ Cover Letter Generation
+✅ Payment Processing
+✅ File Upload
+✅ User Management
+```
+
+---
+
+## 🎉 **GETTING STARTED:**
+
+### **Quickest Way:**
+```
+1. Download APK from GitHub Actions
+2. Install on Android phone
+3. Open app
+4. Start using!
+```
+
+### **For Development:**
+```
+1. Clone repository
+2. Setup Flutter/React Native
+3. Run locally
+4. Make changes
+5. Build APK
+```
+
+---
+
+## 📞 **SUPPORT:**
+
+- **Issues:** [GitHub Issues](https://github.com/samarthkumar096-commits/careerboost-ai/issues)
+- **Email:** kumarsamarth982@gmail.com
+- **Documentation:** [Guides](https://github.com/samarthkumar096-commits/careerboost-ai#documentation)
+
+---
+
+## 📄 **LICENSE:**
+
+MIT License - Feel free to use and modify!
+
+---
+
+## 🌟 **STAR THIS REPO:**
+
+If you find this useful, please star ⭐ the repository!
+
+---
+
+**Made with ❤️ by Samarth Kumar**
+
+**🚀 CareerBoost AI - Your AI-Powered Career Assistant**
