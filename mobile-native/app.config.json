@@ -1,0 +1,9 @@
+{
+  "expo": {
+    "sdkVersion": "50.0.0",
+    "name": "CareerBoost AI",
+    "slug": "careerboost-ai",
+    "version": "1.0.0",
+    "platforms": ["ios", "android", "web"]
+  }
+}
