@@ -2,10 +2,6 @@ name: Build Real Native APK with EAS
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
-    tags:
-      - 'v*'
 
 jobs:
   build:
@@ -31,15 +27,20 @@ jobs:
       working-directory: ./mobile-native
       run: npm install
     
+    - name: 🔧 Configure EAS Project
+      working-directory: ./mobile-native
+      run: |
+        echo "Configuring EAS project..."
+        eas init --id $(uuidgen) --non-interactive || true
+    
     - name: 🚀 Build APK with EAS
       working-directory: ./mobile-native
       run: |
         echo "Building APK..."
-        eas build --platform android --profile preview --non-interactive --no-wait
-        echo "Build started! Check https://expo.dev for download link"
+        eas build --platform android --profile preview --non-interactive
     
-    - name: 📱 Build Info
+    - name: 📱 Build Complete
       run: |
-        echo "✅ APK build started successfully!"
+        echo "✅ APK build completed!"
         echo "📱 Check your Expo dashboard for download link"
-        echo "🔗 https://expo.dev/accounts/[your-username]/projects/careerboost-ai/builds"
+        echo "🔗 https://expo.dev"
