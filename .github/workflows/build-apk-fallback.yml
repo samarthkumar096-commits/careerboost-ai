@@ -1,0 +1,47 @@
+name: Build APK - Fallback Method
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-fallback:
+    name: Build APK (Fallback)
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+    
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: '17'
+    
+    - name: Install dependencies
+      working-directory: ./mobile-native
+      run: npm install --legacy-peer-deps
+    
+    - name: Setup Expo
+      run: npm install -g expo-cli @expo/ngrok
+    
+    - name: Expo prebuild
+      working-directory: ./mobile-native
+      run: npx expo prebuild --platform android --clean
+    
+    - name: Build APK
+      working-directory: ./mobile-native/android
+      run: |
+        chmod +x gradlew
+        ./gradlew assembleRelease --no-daemon
+    
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-release
+        path: mobile-native/android/app/build/outputs/apk/release/app-release.apk
