@@ -27,20 +27,27 @@ jobs:
       working-directory: ./mobile-native
       run: npm install
     
-    - name: 🔧 Configure EAS Project
+    - name: 🎨 Generate placeholder assets
       working-directory: ./mobile-native
       run: |
-        echo "Configuring EAS project..."
-        eas init --id $(uuidgen) --non-interactive || true
+        mkdir -p assets
+        # Create simple placeholder icon (1024x1024 purple square)
+        convert -size 1024x1024 xc:"#8B5CF6" assets/icon.png || echo "ImageMagick not available, using default"
+        cp assets/icon.png assets/adaptive-icon.png 2>/dev/null || true
+        # Create splash screen (1284x2778 purple)
+        convert -size 1284x2778 xc:"#8B5CF6" assets/splash.png || echo "Using default splash"
+        # Create favicon (48x48)
+        convert -size 48x48 xc:"#8B5CF6" assets/favicon.png || echo "Using default favicon"
+        echo "Assets generated or using defaults"
     
     - name: 🚀 Build APK with EAS
       working-directory: ./mobile-native
       run: |
-        echo "Building APK..."
+        echo "Building native APK..."
         eas build --platform android --profile preview --non-interactive
     
     - name: 📱 Build Complete
       run: |
-        echo "✅ APK build completed!"
-        echo "📱 Check your Expo dashboard for download link"
-        echo "🔗 https://expo.dev"
+        echo "✅ Native APK build completed!"
+        echo "📱 Download from: https://expo.dev"
+        echo "🔗 Login and check your builds"
