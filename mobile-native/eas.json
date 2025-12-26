@@ -1,43 +1,28 @@
 {
   "cli": {
-    "version": ">= 5.2.0",
-    "appVersionSource": "remote"
+    "version": ">= 5.2.0"
   },
   "build": {
     "development": {
       "developmentClient": true,
       "distribution": "internal",
       "android": {
-        "gradleCommand": ":app:assembleDebug",
         "buildType": "apk"
       }
     },
     "preview": {
       "distribution": "internal",
       "android": {
-        "gradleCommand": ":app:assembleRelease",
         "buildType": "apk"
-      },
-      "env": {
-        "EXPO_PUBLIC_ENV": "preview"
       }
     },
     "production": {
       "android": {
-        "gradleCommand": ":app:bundleRelease",
-        "buildType": "app-bundle"
-      },
-      "env": {
-        "EXPO_PUBLIC_ENV": "production"
+        "buildType": "apk"
       }
     }
   },
   "submit": {
-    "production": {
-      "android": {
-        "serviceAccountKeyPath": "./service-account.json",
-        "track": "internal"
-      }
-    }
+    "production": {}
   }
 }
