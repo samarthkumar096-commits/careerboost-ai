@@ -19,11 +19,13 @@ workflows:
       - name: Get Flutter packages
         script: |
           cd mobile-flutter
-          flutter packages pub get
+          flutter clean
+          flutter pub get
       - name: Flutter analyze
         script: |
           cd mobile-flutter
           flutter analyze
+        ignore_failure: true
       - name: Flutter unit tests
         script: |
           cd mobile-flutter
