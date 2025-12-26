@@ -16,7 +16,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.careerboostai.app",
+      "bundleIdentifier": "com.samarthshah559.careerboostai",
       "buildNumber": "1.0.0"
     },
     "android": {
@@ -24,15 +24,12 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#8B5CF6"
       },
-      "package": "com.careerboostai.app",
+      "package": "com.samarthshah559.careerboostai",
       "versionCode": 1,
       "permissions": [
         "INTERNET",
-        "ACCESS_NETWORK_STATE",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE"
-      ],
-      "useNextNotificationsApi": true
+        "ACCESS_NETWORK_STATE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -47,18 +44,6 @@
           "imageWidth": 200
         }
       ]
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-      }
-    },
-    "owner": "samarthkumar096",
-    "updates": {
-      "fallbackToCacheTimeout": 0
-    },
-    "runtimeVersion": {
-      "policy": "sdkVersion"
-    }
+    ]
   }
 }
