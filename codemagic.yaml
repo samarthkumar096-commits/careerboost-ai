@@ -1,0 +1,52 @@
+name: CareerBoost AI Flutter
+workflows:
+  android-workflow:
+    name: Android Workflow
+    max_build_duration: 60
+    instance_type: mac_mini_m1
+    environment:
+      groups:
+        - google_play
+      vars:
+        PACKAGE_NAME: "com.careerboostai.app"
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+    scripts:
+      - name: Set up local.properties
+        script: |
+          echo "flutter.sdk=$HOME/programs/flutter" > "$CM_BUILD_DIR/mobile-flutter/android/local.properties"
+      - name: Get Flutter packages
+        script: |
+          cd mobile-flutter
+          flutter packages pub get
+      - name: Flutter analyze
+        script: |
+          cd mobile-flutter
+          flutter analyze
+      - name: Flutter unit tests
+        script: |
+          cd mobile-flutter
+          flutter test
+        ignore_failure: true
+      - name: Build APK with Flutter
+        script: |
+          cd mobile-flutter
+          flutter build apk --release --split-per-abi
+      - name: Build App Bundle
+        script: |
+          cd mobile-flutter
+          flutter build appbundle --release
+    artifacts:
+      - mobile-flutter/build/app/outputs/flutter-apk/*.apk
+      - mobile-flutter/build/app/outputs/bundle/release/*.aab
+      - mobile-flutter/build/**/outputs/**/*.apk
+      - mobile-flutter/build/**/outputs/**/*.aab
+      - mobile-flutter/build/**/outputs/**/mapping.txt
+    publishing:
+      email:
+        recipients:
+          - kumarsamarth982@gmail.com
+        notify:
+          success: true
+          failure: true
