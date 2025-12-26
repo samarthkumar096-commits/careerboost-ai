@@ -1,53 +1,43 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, View, ActivityIndicator } from 'react-native';
-import { WebView } from 'react-native-webview';
-import { useState } from 'react';
-import * as SplashScreen from 'expo-splash-screen';
-
-// Keep splash screen visible while loading
-SplashScreen.preventAutoHideAsync();
+import React from 'react';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, StatusBar } from 'react-native';
 
 export default function App() {
-  const [isLoading, setIsLoading] = useState(true);
-
-  const handleLoadEnd = () => {
-    setIsLoading(false);
-    SplashScreen.hideAsync();
-  };
-
   return (
     <View style={styles.container}>
-      <StatusBar style="light" backgroundColor="#8B5CF6" />
+      <StatusBar barStyle="light-content" backgroundColor="#8B5CF6" />
       
-      {isLoading && (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#8B5CF6" />
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>CareerBoost AI</Text>
+        <Text style={styles.headerSubtitle}>Your Career Growth Partner</Text>
+      </View>
+
+      {/* Main Content */}
+      <ScrollView style={styles.content}>
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>🚀 Welcome to CareerBoost AI</Text>
+          <Text style={styles.cardText}>
+            Your personal AI-powered career assistant to help you grow and succeed.
+          </Text>
         </View>
-      )}
-      
-      <WebView
-        source={{ uri: 'https://careerboost-ai-two.vercel.app' }}
-        style={styles.webview}
-        javaScriptEnabled={true}
-        domStorageEnabled={true}
-        startInLoadingState={true}
-        scalesPageToFit={true}
-        allowsBackForwardNavigationGestures={true}
-        allowsInlineMediaPlayback={true}
-        mediaPlaybackRequiresUserAction={false}
-        onLoadEnd={handleLoadEnd}
-        onError={(syntheticEvent) => {
-          const { nativeEvent } = syntheticEvent;
-          console.warn('WebView error: ', nativeEvent);
-        }}
-        // Enable caching for better performance
-        cacheEnabled={true}
-        cacheMode="LOAD_CACHE_ELSE_NETWORK"
-        // Security
-        mixedContentMode="always"
-        // Performance
-        androidLayerType="hardware"
-      />
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>💼 Features</Text>
+          <Text style={styles.feature}>✓ AI-Powered Career Guidance</Text>
+          <Text style={styles.feature}>✓ Resume Builder</Text>
+          <Text style={styles.feature}>✓ Interview Preparation</Text>
+          <Text style={styles.feature}>✓ Skill Assessment</Text>
+          <Text style={styles.feature}>✓ Job Recommendations</Text>
+        </View>
+
+        <TouchableOpacity style={styles.button}>
+          <Text style={styles.buttonText}>Get Started</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.button, styles.buttonSecondary]}>
+          <Text style={styles.buttonTextSecondary}>Learn More</Text>
+        </TouchableOpacity>
+      </ScrollView>
     </View>
   );
 }
@@ -55,20 +45,76 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F3F4F6',
+  },
+  header: {
     backgroundColor: '#8B5CF6',
-  },
-  webview: {
-    flex: 1,
-  },
-  loadingContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
+    padding: 30,
+    paddingTop: 50,
     alignItems: 'center',
+  },
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    marginBottom: 5,
+  },
+  headerSubtitle: {
+    fontSize: 16,
+    color: '#E9D5FF',
+  },
+  content: {
+    flex: 1,
+    padding: 20,
+  },
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  cardTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#1F2937',
+    marginBottom: 10,
+  },
+  cardText: {
+    fontSize: 16,
+    color: '#6B7280',
+    lineHeight: 24,
+  },
+  feature: {
+    fontSize: 16,
+    color: '#4B5563',
+    marginBottom: 8,
+    paddingLeft: 10,
+  },
+  button: {
     backgroundColor: '#8B5CF6',
-    zIndex: 1,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  buttonSecondary: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 2,
+    borderColor: '#8B5CF6',
+  },
+  buttonTextSecondary: {
+    color: '#8B5CF6',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });
