@@ -3,6 +3,7 @@ name: Build Real Native APK with EAS
 on:
   workflow_dispatch:
   push:
+    branches: [ main ]
     tags:
       - 'v*'
 
@@ -11,28 +12,34 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout code
+    - name: 🏗 Checkout code
       uses: actions/checkout@v3
     
-    - name: Setup Node.js
+    - name: 🏗 Setup Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '18'
     
-    - name: Setup Expo
+    - name: 🏗 Setup Expo and EAS
       uses: expo/expo-github-action@v8
       with:
         expo-version: latest
         eas-version: latest
         token: ${{ secrets.EXPO_TOKEN }}
     
-    - name: Install dependencies
+    - name: 📦 Install dependencies
       working-directory: ./mobile-native
       run: npm install
     
-    - name: Build APK with EAS
+    - name: 🚀 Build APK with EAS
       working-directory: ./mobile-native
-      run: eas build --platform android --profile preview --non-interactive --no-wait
+      run: |
+        echo "Building APK..."
+        eas build --platform android --profile preview --non-interactive --no-wait
+        echo "Build started! Check https://expo.dev for download link"
     
-    - name: Get build URL
-      run: echo "APK will be available at https://expo.dev"
+    - name: 📱 Build Info
+      run: |
+        echo "✅ APK build started successfully!"
+        echo "📱 Check your Expo dashboard for download link"
+        echo "🔗 https://expo.dev/accounts/[your-username]/projects/careerboost-ai/builds"
