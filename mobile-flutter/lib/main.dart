@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'screens/splash_screen.dart';
 import 'screens/home_screen.dart';
 import 'providers/app_provider.dart';
+import 'providers/api_providers.dart';
 import 'utils/theme.dart';
 
 void main() {
@@ -36,6 +37,8 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AppProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => ResumeProvider()),
       ],
       child: MaterialApp(
         title: 'CareerBoost AI',
